@@ -1,77 +1,61 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Scholar match</title>
-  
+  <title>Scholar Match</title>
+
   <style>
-  body {
-    font-family: Arial;
-    text-align: center;
-    background-color: #f4f6f9;
-  }
+    body {
+      font-family: Arial;
+      text-align: center;
+      background-color: #f4f6f9;
+    }
 
-  input {
-    padding: 8px;
-    width: 200px;
-  }
+    input {
+      padding: 8px;
+      width: 200px;
+    }
 
-  button {
-    padding: 8px 15px;
-    margin: 5px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    cursor: pointer;
-  }
+    button {
+      padding: 8px 15px;
+      margin: 5px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
 
-  .scholarship {
-    background: white;
-    margin: 15px auto;
-    padding: 15px;
-    width: 300px;
-    border-radius: 8px;
-    box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
-  }
-</style>
+    .scholarship {
+      background: white;
+      margin: 15px auto;
+      padding: 15px;
+      width: 300px;
+      border-radius: 8px;
+      box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
+    }
+  </style>
 </head>
 <body>
 
-  <h1>Scholar Match</h1>
+<h1>Scholar Match</h1>
 
-  <div id="auth-section">
-    <input type="email" id="email" placeholder="Email"><br><br>
-    <input type="password" id="password" placeholder="Password"><br><br>
-    <button onclick="signUp()">Sign Up</button>
-    <button onclick="login()">Login</button>
-  </div>
+<div id="auth-section">
+  <input type="email" id="email" placeholder="Email"><br><br>
+  <input type="password" id="password" placeholder="Password"><br><br>
+  <button onclick="signUp()">Sign Up</button>
+  <button onclick="login()">Login</button>
+</div>
 
-  <div id="user-section" style="display:none;">
+<div id="user-section" style="display:none;">
   <h2 id="welcome"></h2>
 
   <h3>Available Scholarships</h3>
-<div id="scholarship-list"></div>
-
-  <div class="scholarship">
-    <h4>NSFAS Funding</h4>
-    <p>For South African students in public universities.</p>
-  </div>
-
-  <div class="scholarship">
-    <h4>Funza Lushaka Bursary</h4>
-    <p>For students studying teaching qualifications.</p>
-  </div>
-
-  <div class="scholarship">
-    <h4>Sasol Bursary</h4>
-    <p>For students in engineering and science fields.</p>
-  </div>
+  <div id="scholarship-list"></div>
 
   <br>
   <button onclick="logout()">Logout</button>
 </div>
-  
-    <script>
-      <script type="module">
+
+<script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } 
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -142,5 +126,6 @@
     }
   });
 </script>
+
 </body>
-</html> 
+</html>
