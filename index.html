@@ -76,7 +76,7 @@
   const db = getFirestore(app);
 
   async function loadScholarships() {
-    const querySnapshot = await getDocs(collection(db, "scholarships"));
+    const querySnapshot = await getDocs(collection(db, "scholarship"));
     const list = document.getElementById("scholarship-list");
     list.innerHTML = "";
 
