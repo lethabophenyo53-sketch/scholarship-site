@@ -60,6 +60,24 @@
 <input type="text" id="link" placeholder="Application Link"><br><br>
 
 <button onclick="addScholarship()">Add Scholarship</button>
+
+  window.addScholarship = async function(){
+
+  const title = document.getElementById("title").value;
+  const description = document.getElementById("description").value;
+  const link = document.getElementById("link").value;
+
+  await addDoc(collection(db, "scholarship"), {
+    title: title,
+    description: description,
+    link: link
+  });
+
+  alert("Scholarship Added!");
+
+  loadScholarships();
+
+}
   
 <h3>Saved Scholarships</h3>
 <div id="saved-list"></div>
@@ -110,24 +128,6 @@ loadSavedScholarships();
 
         <a href="${data.link}" target="_blank">
           <button>Apply</button>
-
-          window.addScholarship = async function(){
-
-  const title = document.getElementById("title").value;
-  const description = document.getElementById("description").value;
-  const link = document.getElementById("link").value;
-
-  await addDoc(collection(db, "scholarship"), {
-    title: title,
-    description: description,
-    link: link
-  });
-
-  alert("Scholarship Added!");
-
-  loadScholarships();
-
-}
         </a>
       </div>
       `;
