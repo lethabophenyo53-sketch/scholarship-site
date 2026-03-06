@@ -52,16 +52,7 @@
   <div id="scholarship-list"></div>
 
   <h3>Add Scholarship (Admin)</h3>
-
-<input type="text" id="title" placeholder="Scholarship Title"><br><br>
-
-<input type="text" id="description" placeholder="Description"><br><br>
-
-<input type="text" id="link" placeholder="Application Link"><br><br>
-
-<button onclick="addScholarship()">Add Scholarship</button>
-
-  window.addScholarship = async function(){
+window.addScholarship = async function(){
 
   const title = document.getElementById("title").value;
   const description = document.getElementById("description").value;
@@ -76,8 +67,14 @@
   alert("Scholarship Added!");
 
   loadScholarships();
-
 }
+<input type="text" id="title" placeholder="Scholarship Title"><br><br>
+
+<input type="text" id="description" placeholder="Description"><br><br>
+
+<input type="text" id="link" placeholder="Application Link"><br><br>
+
+<button onclick="addScholarship()">Add Scholarship</button>
   
 <h3>Saved Scholarships</h3>
 <div id="saved-list"></div>
