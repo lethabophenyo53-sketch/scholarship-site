@@ -82,16 +82,34 @@ from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     querySnapshot.forEach((doc) => {
       const data = doc.data();
+      
+      window.saveScholarship = async function(title, description, link) {
 
-     list.innerHTML += `
-  <div class="scholarship">
-    <h4>${data.title}</h4>
-    <p>${data.description}</p>
-    <br>
-    <a href="${data.link}" target="_blank">
-      <button>Apply Now</button>
-    </a>
-  </div>
+  const user = auth.currentUser;
+
+  await addDoc(collection(db, "savedScholarships"), {
+    user: user.email,
+    title: title,
+    description: description,
+    link: link
+  });
+
+  alert("Scholarship saved!");
+}
+
+   list.innerHTML += `
+<div class="scholarship">
+  <h4>${data.title}</h4>
+  <p>${data.description}</p>
+
+  <a href="${data.link}" target="_blank">
+    <button>Apply Now</button>
+  </a>
+
+  <button onclick="saveScholarship('${data.title}','${data.description}','${data.link}')">
+    Save
+  </button>
+</div>
 `;
     });
   }
