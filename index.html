@@ -83,11 +83,16 @@
     querySnapshot.forEach((doc) => {
       const data = doc.data();
 
-      list.innerHTML += `
-        <div class="scholarship">
-          <h4>${data.title}</h4>
-          <p>${data.description}</p>
-        </div>
+     list.innerHTML += `
+  <div class="scholarship">
+    <h4>${data.title}</h4>
+    <p>${data.description}</p>
+    <br>
+    <a href="${data.link}" target="_blank">
+      <button>Apply Now</button>
+    </a>
+  </div>
+`;
       `;
     });
   }
