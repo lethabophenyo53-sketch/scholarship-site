@@ -51,6 +51,18 @@
   <h3>Available Scholarships</h3>
   <div id="scholarship-list"></div>
 
+  <h3>Add Scholarship (Admin)</h3>
+
+<input type="text" id="title" placeholder="Scholarship Title"><br><br>
+
+<input type="text" id="description" placeholder="Description"><br><br>
+
+<input type="text" id="link" placeholder="Application Link"><br><br>
+
+<button onclick="addScholarship()">Add Scholarship</button>
+  
+<h3>Saved Scholarships</h3>
+<div id="saved-list"></div>
   <br>
   <button onclick="logout()">Logout</button>
 </div>
@@ -75,45 +87,55 @@ from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  async function loadScholarships() {
-    const querySnapshot = await getDocs(collection(db, "scholarship"));
-    const list = document.getElementById("scholarship-list");
-    list.innerHTML = "";
-
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      
-      window.saveScholarship = async function(title, description, link) {
+  async function loadScholarships();
+loadSavedScholarships();
 
   const user = auth.currentUser;
 
-  await addDoc(collection(db, "savedScholarships"), {
-    user: user.email,
+  const querySnapshot = await getDocs(collection(db, "savedScholarships"));
+
+  const list = document.getElementById("saved-list");
+  list.innerHTML = "";
+
+  querySnapshot.forEach((doc) => {
+
+    const data = doc.data();
+
+    if(data.user === user.email){
+
+      list.innerHTML += `
+      <div class="scholarship">
+        <h4>${data.title}</h4>
+        <p>${data.description}</p>
+
+        <a href="${data.link}" target="_blank">
+          <button>Apply</button>
+
+          window.addScholarship = async function(){
+
+  const title = document.getElementById("title").value;
+  const description = document.getElementById("description").value;
+  const link = document.getElementById("link").value;
+
+  await addDoc(collection(db, "scholarship"), {
     title: title,
     description: description,
     link: link
   });
 
-  alert("Scholarship saved!");
+  alert("Scholarship Added!");
+
+  loadScholarships();
+
 }
+        </a>
+      </div>
+      `;
 
-   list.innerHTML += `
-<div class="scholarship">
-  <h4>${data.title}</h4>
-  <p>${data.description}</p>
+    }
 
-  <a href="${data.link}" target="_blank">
-    <button>Apply Now</button>
-  </a>
-
-  <button onclick="saveScholarship('${data.title}','${data.description}','${data.link}')">
-    Save
-  </button>
-</div>
-`;
-    });
-  }
-
+  });
+}
   window.signUp = function () {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
