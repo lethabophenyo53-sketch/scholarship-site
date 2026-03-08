@@ -4,7 +4,6 @@
 <title>Scholar Match</title>
 
 <style>
-
 body{
 font-family: Arial;
 text-align:center;
@@ -33,7 +32,6 @@ width:300px;
 border-radius:8px;
 box-shadow:0px 2px 5px rgba(0,0,0,0.1);
 }
-
 </style>
 
 </head>
@@ -41,8 +39,6 @@ box-shadow:0px 2px 5px rgba(0,0,0,0.1);
 <body>
 
 <h1>Scholar Match</h1>
-
-<!-- AUTH SECTION -->
 
 <div id="auth-section">
 
@@ -57,14 +53,9 @@ box-shadow:0px 2px 5px rgba(0,0,0,0.1);
 </div>
 
 
-<!-- USER SECTION -->
-
 <div id="user-section" style="display:none;">
 
 <h2 id="welcome"></h2>
-
-
-<!-- PROFILE -->
 
 <h3>Your Profile</h3>
 
@@ -77,9 +68,6 @@ box-shadow:0px 2px 5px rgba(0,0,0,0.1);
 <button onclick="saveProfile()">Save Profile</button>
 
 <br><br>
-
-
-<!-- SEARCH -->
 
 <h3>Available Scholarships</h3>
 
@@ -95,8 +83,6 @@ onkeyup="searchScholarships()"
 <div id="scholarship-list"></div>
 
 
-<!-- ADMIN ADD -->
-
 <h3>Add Scholarship (Admin)</h3>
 
 <input type="text" id="title" placeholder="Scholarship Title"><br><br>
@@ -107,8 +93,6 @@ onkeyup="searchScholarships()"
 
 <button onclick="addScholarship()">Add Scholarship</button>
 
-
-<!-- SAVED -->
 
 <h3>Saved Scholarships</h3>
 
@@ -132,8 +116,7 @@ createUserWithEmailAndPassword,
 signInWithEmailAndPassword,
 signOut,
 onAuthStateChanged
-}
-from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 import {
 getFirestore,
@@ -142,48 +125,36 @@ getDocs,
 addDoc,
 setDoc,
 doc
-}
-from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 
 const firebaseConfig = {
-
 apiKey: "AIzaSyDB94Hy6sFUBXE4ObSOQmPW5As4Fbxaoi4",
 authDomain: "scholarship-platform-ec01f.firebaseapp.com",
 projectId: "scholarship-platform-ec01f",
 storageBucket: "scholarship-platform-ec01f.firebasestorage.app",
 messagingSenderId: "807575045909",
 appId: "1:807575045909:web:9a61a548638423d7988b1c"
-
 };
 
-
 const app = initializeApp(firebaseConfig);
-
 const auth = getAuth(app);
-
 const db = getFirestore(app);
-
 
 let allScholarships = [];
 
-
-/* LOAD SCHOLARSHIPS */
 
 async function loadScholarships(){
 
 const querySnapshot = await getDocs(collection(db,"scholarship"));
 
 const list = document.getElementById("scholarship-list");
-
 list.innerHTML="";
-
 allScholarships=[];
 
 querySnapshot.forEach((doc)=>{
 
 const data = doc.data();
-
 allScholarships.push(data);
 
 displayScholarship(data);
@@ -192,8 +163,6 @@ displayScholarship(data);
 
 }
 
-
-/* DISPLAY */
 
 function displayScholarship(data){
 
@@ -226,12 +195,9 @@ Save
 }
 
 
-/* SEARCH */
-
 window.searchScholarships=function(){
 
 const keyword=document.getElementById("search").value.toLowerCase();
-
 const list=document.getElementById("scholarship-list");
 
 list.innerHTML="";
@@ -239,23 +205,16 @@ list.innerHTML="";
 allScholarships.forEach((s)=>{
 
 if(
-
 s.title.toLowerCase().includes(keyword) ||
-
 s.description.toLowerCase().includes(keyword)
-
 ){
-
 displayScholarship(s);
-
 }
 
 });
 
 }
 
-
-/* ADD SCHOLARSHIP */
 
 window.addScholarship = async function(){
 
@@ -264,11 +223,9 @@ const description=document.getElementById("description").value;
 const link=document.getElementById("link").value;
 
 await addDoc(collection(db,"scholarship"),{
-
 title:title,
 description:description,
 link:link
-
 });
 
 alert("Scholarship Added");
@@ -278,19 +235,20 @@ loadScholarships();
 }
 
 
-/* SAVE SCHOLARSHIP */
-
 window.saveScholarship = async function(title,description,link){
 
 const user = auth.currentUser;
 
-await addDoc(collection(db,"savedScholarships"),{
+if(!user){
+alert("Login first");
+return;
+}
 
+await addDoc(collection(db,"savedScholarships"),{
 user:user.email,
 title:title,
 description:description,
 link:link
-
 });
 
 alert("Scholarship Saved");
@@ -299,8 +257,6 @@ loadSavedScholarships();
 
 }
 
-
-/* LOAD SAVED */
 
 async function loadSavedScholarships(){
 
@@ -311,7 +267,6 @@ if(!user) return;
 const querySnapshot = await getDocs(collection(db,"savedScholarships"));
 
 const list=document.getElementById("saved-list");
-
 list.innerHTML="";
 
 querySnapshot.forEach((doc)=>{
@@ -345,18 +300,13 @@ list.innerHTML+=`
 }
 
 
-/* SAVE PROFILE */
-
 window.saveProfile = async function(){
 
 const user = auth.currentUser;
 
 if(!user){
-
 alert("Login first");
-
 return;
-
 }
 
 const country=document.getElementById("country").value;
@@ -364,11 +314,9 @@ const field=document.getElementById("field").value;
 const degree=document.getElementById("degree").value;
 
 await setDoc(doc(db,"profiles",user.uid),{
-
 country:country,
 field:field,
 degree:degree
-
 });
 
 alert("Profile Saved");
@@ -376,17 +324,13 @@ alert("Profile Saved");
 }
 
 
-/* AUTH */
-
 window.signUp=function(){
 
 const email=document.getElementById("email").value;
 const password=document.getElementById("password").value;
 
 createUserWithEmailAndPassword(auth,email,password)
-
 .then(()=>alert("User Created"))
-
 .catch(error=>alert(error.message));
 
 }
@@ -398,35 +342,26 @@ const email=document.getElementById("email").value;
 const password=document.getElementById("password").value;
 
 signInWithEmailAndPassword(auth,email,password)
-
 .then(()=>alert("Logged In"))
-
 .catch(error=>alert(error.message));
 
 }
 
 
 window.logout=function(){
-
 signOut(auth);
-
 }
 
-
-/* AUTH STATE */
 
 onAuthStateChanged(auth,(user)=>{
 
 if(user){
 
 document.getElementById("auth-section").style.display="none";
-
 document.getElementById("user-section").style.display="block";
-
 document.getElementById("welcome").innerText="Welcome "+user.email;
 
 loadScholarships();
-
 loadSavedScholarships();
 
 }
@@ -434,7 +369,6 @@ loadSavedScholarships();
 else{
 
 document.getElementById("auth-section").style.display="block";
-
 document.getElementById("user-section").style.display="none";
 
 }
