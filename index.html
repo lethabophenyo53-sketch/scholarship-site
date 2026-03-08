@@ -89,10 +89,15 @@ onkeyup="searchScholarships()"
 
 <input type="text" id="description" placeholder="Description"><br><br>
 
+<input type="text" id="countryScholarship" placeholder="Country"><br><br>
+
+<input type="text" id="fieldScholarship" placeholder="Field of Study"><br><br>
+
+<input type="text" id="degreeScholarship" placeholder="Degree Level"><br><br>
+
 <input type="text" id="link" placeholder="Application Link"><br><br>
 
 <button onclick="addScholarship()">Add Scholarship</button>
-
 
 <h3>Saved Scholarships</h3>
 
@@ -220,12 +225,20 @@ window.addScholarship = async function(){
 
 const title=document.getElementById("title").value;
 const description=document.getElementById("description").value;
+const country=document.getElementById("countryScholarship").value;
+const field=document.getElementById("fieldScholarship").value;
+const degree=document.getElementById("degreeScholarship").value;
 const link=document.getElementById("link").value;
 
 await addDoc(collection(db,"scholarship"),{
+
 title:title,
 description:description,
+country:country,
+field:field,
+degree:degree,
 link:link
+
 });
 
 alert("Scholarship Added");
@@ -233,7 +246,51 @@ alert("Scholarship Added");
 loadScholarships();
 
 }
+alert("Scholarship Added");
 
+loadScholarships();
+
+}
+async function matchScholarships(){
+
+const user = auth.currentUser;
+
+if(!user) return;
+
+const profileDoc = await getDocs(collection(db,"profiles"));
+
+profileDoc.forEach((docData)=>{
+
+if(docData.id === user.uid){
+
+const profile = docData.data();
+
+const list=document.getElementById("scholarship-list");
+
+list.innerHTML="";
+
+allScholarships.forEach((s)=>{
+
+if(
+s.country.toLowerCase() === profile.country.toLowerCase() &&
+s.field.toLowerCase() === profile.field.toLowerCase() &&
+s.degree.toLowerCase() === profile.degree.toLowerCase()
+){
+
+displayScholarship(s);
+
+}
+
+});
+
+}
+
+});
+
+}
+  <button onclick="matchScholarships()">Find Matching Scholarships</button>
+
+<br><br>
 
 window.saveScholarship = async function(title,description,link){
 
