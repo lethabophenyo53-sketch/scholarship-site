@@ -56,6 +56,18 @@ box-shadow:0px 2px 5px rgba(0,0,0,0.1);
 <div id="user-section" style="display:none;">
 
 <h2 id="welcome"></h2>
+  
+  <h3>Your Profile</h3>
+
+<input type="text" id="country" placeholder="Country"><br><br>
+
+<input type="text" id="field" placeholder="Field of Study"><br><br>
+
+<input type="text" id="degree" placeholder="Degree Level"><br><br>
+
+<button onclick="saveProfile()">Save Profile</button>
+
+<br><br>
 
 <h3>Available Scholarships</h3>
 
@@ -94,14 +106,34 @@ box-shadow:0px 2px 5px rgba(0,0,0,0.1);
 
 <script type="module">
 
+  window.saveProfile = async function(){
+
+const user = auth.currentUser;
+
+const country = document.getElementById("country").value;
+const field = document.getElementById("field").value;
+const degree = document.getElementById("degree").value;
+
+await setDoc(doc(db,"profiles",user.uid),{
+
+country:country,
+field:field,
+degree:degree
+
+});
+
+alert("Profile Saved!");
+
+}
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged }
 
 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-import { getFirestore, collection, getDocs, addDoc }
-
+import { getFirestore, collection, getDocs, addDoc, setDoc, doc }
+  
 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 
