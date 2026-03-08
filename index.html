@@ -169,6 +169,8 @@ async function loadSavedScholarships(){
 
 const user = auth.currentUser;
 
+if(!user) return;
+
 const querySnapshot = await getDocs(collection(db,"savedScholarships"));
 
 const list = document.getElementById("saved-list");
@@ -229,6 +231,10 @@ link:link
 
 
 alert("Scholarship Added");
+
+document.getElementById("title").value="";
+document.getElementById("description").value="";
+document.getElementById("link").value="";
 
 loadScholarships();
 
