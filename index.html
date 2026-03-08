@@ -4,6 +4,7 @@
 <title>Scholar Match</title>
 
 <style>
+
 body{
 font-family: Arial;
 text-align:center;
@@ -12,7 +13,7 @@ background:#f4f6f9;
 
 input{
 padding:8px;
-width:200px;
+width:220px;
 }
 
 button{
@@ -32,6 +33,7 @@ width:300px;
 border-radius:8px;
 box-shadow:0px 2px 5px rgba(0,0,0,0.1);
 }
+
 </style>
 
 </head>
@@ -39,6 +41,8 @@ box-shadow:0px 2px 5px rgba(0,0,0,0.1);
 <body>
 
 <h1>Scholar Match</h1>
+
+<!-- AUTH SECTION -->
 
 <div id="auth-section">
 
@@ -53,11 +57,16 @@ box-shadow:0px 2px 5px rgba(0,0,0,0.1);
 </div>
 
 
+<!-- USER SECTION -->
+
 <div id="user-section" style="display:none;">
 
 <h2 id="welcome"></h2>
-  
-  <h3>Your Profile</h3>
+
+
+<!-- PROFILE -->
+
+<h3>Your Profile</h3>
 
 <input type="text" id="country" placeholder="Country"><br><br>
 
@@ -69,18 +78,24 @@ box-shadow:0px 2px 5px rgba(0,0,0,0.1);
 
 <br><br>
 
+
+<!-- SEARCH -->
+
 <h3>Available Scholarships</h3>
 
-  <input 
-  type="text" 
-  id="search" 
-  placeholder="Search scholarships..." 
-  onkeyup="searchScholarships()"
+<input 
+type="text"
+id="search"
+placeholder="Search scholarships..."
+onkeyup="searchScholarships()"
 >
+
 <br><br>
 
 <div id="scholarship-list"></div>
 
+
+<!-- ADMIN ADD -->
 
 <h3>Add Scholarship (Admin)</h3>
 
@@ -93,6 +108,8 @@ box-shadow:0px 2px 5px rgba(0,0,0,0.1);
 <button onclick="addScholarship()">Add Scholarship</button>
 
 
+<!-- SAVED -->
+
 <h3>Saved Scholarships</h3>
 
 <div id="saved-list"></div>
@@ -104,51 +121,38 @@ box-shadow:0px 2px 5px rgba(0,0,0,0.1);
 </div>
 
 
+
 <script type="module">
-
-  window.saveProfile = async function(){
-
-const user = auth.currentUser;
-
-const country = document.getElementById("country").value;
-const field = document.getElementById("field").value;
-const degree = document.getElementById("degree").value;
-
-await setDoc(doc(db,"profiles",user.uid),{
-
-country:country,
-field:field,
-degree:degree
-
-});
-
-alert("Profile Saved!");
-
-}
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged }
-
+import {
+getAuth,
+createUserWithEmailAndPassword,
+signInWithEmailAndPassword,
+signOut,
+onAuthStateChanged
+}
 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-import { getFirestore, collection, getDocs, addDoc, setDoc, doc }
-  
+import {
+getFirestore,
+collection,
+getDocs,
+addDoc,
+setDoc,
+doc
+}
 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 
 const firebaseConfig = {
 
 apiKey: "AIzaSyDB94Hy6sFUBXE4ObSOQmPW5As4Fbxaoi4",
-
 authDomain: "scholarship-platform-ec01f.firebaseapp.com",
-
 projectId: "scholarship-platform-ec01f",
-
 storageBucket: "scholarship-platform-ec01f.firebasestorage.app",
-
 messagingSenderId: "807575045909",
-
 appId: "1:807575045909:web:9a61a548638423d7988b1c"
 
 };
@@ -159,10 +163,12 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 const db = getFirestore(app);
-  
-  let allScholarships = [];
 
 
+let allScholarships = [];
+
+
+/* LOAD SCHOLARSHIPS */
 
 async function loadScholarships(){
 
@@ -172,26 +178,23 @@ const list = document.getElementById("scholarship-list");
 
 list.innerHTML="";
 
+allScholarships=[];
+
 querySnapshot.forEach((doc)=>{
 
 const data = doc.data();
 
-list.innerHTML += `
-<div class="scholarship">
-<h4>${data.title}</h4>
-<p>${data.description}</p>
-<a href="${data.link}" target="_blank">
-<button>Apply Now</button>
-</a>
-<button onclick="saveScholarship('${data.title}','${data.description}','${data.link}')">
-Save
-</button>
-</div>
-`;
+allScholarships.push(data);
+
+displayScholarship(data);
 
 });
+
 }
-  
+
+
+/* DISPLAY */
+
 function displayScholarship(data){
 
 const list = document.getElementById("scholarship-list");
@@ -222,6 +225,83 @@ Save
 
 }
 
+
+/* SEARCH */
+
+window.searchScholarships=function(){
+
+const keyword=document.getElementById("search").value.toLowerCase();
+
+const list=document.getElementById("scholarship-list");
+
+list.innerHTML="";
+
+allScholarships.forEach((s)=>{
+
+if(
+
+s.title.toLowerCase().includes(keyword) ||
+
+s.description.toLowerCase().includes(keyword)
+
+){
+
+displayScholarship(s);
+
+}
+
+});
+
+}
+
+
+/* ADD SCHOLARSHIP */
+
+window.addScholarship = async function(){
+
+const title=document.getElementById("title").value;
+const description=document.getElementById("description").value;
+const link=document.getElementById("link").value;
+
+await addDoc(collection(db,"scholarship"),{
+
+title:title,
+description:description,
+link:link
+
+});
+
+alert("Scholarship Added");
+
+loadScholarships();
+
+}
+
+
+/* SAVE SCHOLARSHIP */
+
+window.saveScholarship = async function(title,description,link){
+
+const user = auth.currentUser;
+
+await addDoc(collection(db,"savedScholarships"),{
+
+user:user.email,
+title:title,
+description:description,
+link:link
+
+});
+
+alert("Scholarship Saved");
+
+loadSavedScholarships();
+
+}
+
+
+/* LOAD SAVED */
+
 async function loadSavedScholarships(){
 
 const user = auth.currentUser;
@@ -230,14 +310,13 @@ if(!user) return;
 
 const querySnapshot = await getDocs(collection(db,"savedScholarships"));
 
-const list = document.getElementById("saved-list");
+const list=document.getElementById("saved-list");
 
 list.innerHTML="";
 
-
 querySnapshot.forEach((doc)=>{
 
-const data = doc.data();
+const data=doc.data();
 
 if(data.user===user.email){
 
@@ -266,73 +345,43 @@ list.innerHTML+=`
 }
 
 
+/* SAVE PROFILE */
 
-window.searchScholarships = function(){
-
-const keyword = document.getElementById("search").value.toLowerCase();
-
-const list = document.getElementById("scholarship-list");
-
-list.innerHTML="";
-
-allScholarships.forEach((scholarship)=>{
-
-if(
-scholarship.title.toLowerCase().includes(keyword) ||
-scholarship.description.toLowerCase().includes(keyword)
-){
-
-displayScholarship(scholarship);
-
-}
-
-});
-
-}
-  
-alert("Scholarship Added");
-
-document.getElementById("title").value="";
-document.getElementById("description").value="";
-document.getElementById("link").value="";
-
-loadScholarships();
-
-}
-
-
-
-window.saveScholarship = async function(title,description,link){
+window.saveProfile = async function(){
 
 const user = auth.currentUser;
 
-await addDoc(collection(db,"savedScholarships"),{
+if(!user){
 
-user:user.email,
+alert("Login first");
 
-title:title,
+return;
 
-description:description,
+}
 
-link:link
+const country=document.getElementById("country").value;
+const field=document.getElementById("field").value;
+const degree=document.getElementById("degree").value;
+
+await setDoc(doc(db,"profiles",user.uid),{
+
+country:country,
+field:field,
+degree:degree
 
 });
 
-
-alert("Scholarship Saved");
-
-loadSavedScholarships();
+alert("Profile Saved");
 
 }
 
 
+/* AUTH */
 
 window.signUp=function(){
 
 const email=document.getElementById("email").value;
-
 const password=document.getElementById("password").value;
-
 
 createUserWithEmailAndPassword(auth,email,password)
 
@@ -343,13 +392,10 @@ createUserWithEmailAndPassword(auth,email,password)
 }
 
 
-
 window.login=function(){
 
 const email=document.getElementById("email").value;
-
 const password=document.getElementById("password").value;
-
 
 signInWithEmailAndPassword(auth,email,password)
 
@@ -360,7 +406,6 @@ signInWithEmailAndPassword(auth,email,password)
 }
 
 
-
 window.logout=function(){
 
 signOut(auth);
@@ -368,9 +413,9 @@ signOut(auth);
 }
 
 
+/* AUTH STATE */
 
 onAuthStateChanged(auth,(user)=>{
-
 
 if(user){
 
