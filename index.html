@@ -59,6 +59,14 @@ box-shadow:0px 2px 5px rgba(0,0,0,0.1);
 
 <h3>Available Scholarships</h3>
 
+  <input 
+  type="text" 
+  id="search" 
+  placeholder="Search scholarships..." 
+  onkeyup="searchScholarships()"
+>
+<br><br>
+
 <div id="scholarship-list"></div>
 
 
@@ -119,6 +127,8 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 const db = getFirestore(app);
+  
+  let allScholarships = [];
 
 
 
@@ -130,10 +140,29 @@ const list = document.getElementById("scholarship-list");
 
 list.innerHTML="";
 
-
 querySnapshot.forEach((doc)=>{
 
 const data = doc.data();
+
+list.innerHTML += `
+<div class="scholarship">
+<h4>${data.title}</h4>
+<p>${data.description}</p>
+<a href="${data.link}" target="_blank">
+<button>Apply Now</button>
+</a>
+<button onclick="saveScholarship('${data.title}','${data.description}','${data.link}')">
+Save
+</button>
+</div>
+`;
+
+});
+}
+  
+function displayScholarship(data){
+
+const list = document.getElementById("scholarship-list");
 
 list.innerHTML += `
 
@@ -159,11 +188,7 @@ Save
 
 `;
 
-});
-
 }
-
-
 
 async function loadSavedScholarships(){
 
@@ -210,26 +235,29 @@ list.innerHTML+=`
 
 
 
-window.addScholarship = async function(){
+window.searchScholarships = function(){
 
-const title=document.getElementById("title").value;
+const keyword = document.getElementById("search").value.toLowerCase();
 
-const description=document.getElementById("description").value;
+const list = document.getElementById("scholarship-list");
 
-const link=document.getElementById("link").value;
+list.innerHTML="";
 
+allScholarships.forEach((scholarship)=>{
 
-await addDoc(collection(db,"scholarship"),{
+if(
+scholarship.title.toLowerCase().includes(keyword) ||
+scholarship.description.toLowerCase().includes(keyword)
+){
 
-title:title,
+displayScholarship(scholarship);
 
-description:description,
-
-link:link
+}
 
 });
 
-
+}
+  
 alert("Scholarship Added");
 
 document.getElementById("title").value="";
