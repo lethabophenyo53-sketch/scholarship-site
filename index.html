@@ -33,7 +33,6 @@ border-radius:8px;
 box-shadow:0px 2px 5px rgba(0,0,0,0.1);
 }
 </style>
-
 </head>
 
 <body>
@@ -80,6 +79,10 @@ onkeyup="searchScholarships()"
 
 <br><br>
 
+<button onclick="matchScholarships()">Find Matching Scholarships</button>
+
+<br><br>
+
 <div id="scholarship-list"></div>
 
 
@@ -108,7 +111,6 @@ onkeyup="searchScholarships()"
 <button onclick="logout()">Logout</button>
 
 </div>
-
 
 
 <script type="module">
@@ -142,6 +144,7 @@ messagingSenderId: "807575045909",
 appId: "1:807575045909:web:9a61a548638423d7988b1c"
 };
 
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -154,6 +157,7 @@ async function loadScholarships(){
 const querySnapshot = await getDocs(collection(db,"scholarship"));
 
 const list = document.getElementById("scholarship-list");
+
 list.innerHTML="";
 allScholarships=[];
 
@@ -203,6 +207,7 @@ Save
 window.searchScholarships=function(){
 
 const keyword=document.getElementById("search").value.toLowerCase();
+
 const list=document.getElementById("scholarship-list");
 
 list.innerHTML="";
@@ -221,37 +226,7 @@ displayScholarship(s);
 }
 
 
-window.addScholarship = async function(){
-
-const title=document.getElementById("title").value;
-const description=document.getElementById("description").value;
-const country=document.getElementById("countryScholarship").value;
-const field=document.getElementById("fieldScholarship").value;
-const degree=document.getElementById("degreeScholarship").value;
-const link=document.getElementById("link").value;
-
-await addDoc(collection(db,"scholarship"),{
-
-title:title,
-description:description,
-country:country,
-field:field,
-degree:degree,
-link:link
-
-});
-
-alert("Scholarship Added");
-
-loadScholarships();
-
-}
-alert("Scholarship Added");
-
-loadScholarships();
-
-}
-async function matchScholarships(){
+window.matchScholarships = async function(){
 
 const user = auth.currentUser;
 
@@ -288,9 +263,34 @@ displayScholarship(s);
 });
 
 }
-  <button onclick="matchScholarships()">Find Matching Scholarships</button>
 
-<br><br>
+
+window.addScholarship = async function(){
+
+const title=document.getElementById("title").value;
+const description=document.getElementById("description").value;
+const country=document.getElementById("countryScholarship").value;
+const field=document.getElementById("fieldScholarship").value;
+const degree=document.getElementById("degreeScholarship").value;
+const link=document.getElementById("link").value;
+
+await addDoc(collection(db,"scholarship"),{
+
+title:title,
+description:description,
+country:country,
+field:field,
+degree:degree,
+link:link
+
+});
+
+alert("Scholarship Added");
+
+loadScholarships();
+
+}
+
 
 window.saveScholarship = async function(title,description,link){
 
@@ -324,6 +324,7 @@ if(!user) return;
 const querySnapshot = await getDocs(collection(db,"savedScholarships"));
 
 const list=document.getElementById("saved-list");
+
 list.innerHTML="";
 
 querySnapshot.forEach((doc)=>{
