@@ -79,8 +79,7 @@ box-shadow:0px 2px 5px rgba(0,0,0,0.1);
 <div id="scholarship-list"></div>
 
 
-<h3>Add Scholarship (Admin)</h3>
-
+<!-- ADMIN SECTION -->
 <div id="admin-section" style="display:none;">
 
 <h3>Add Scholarship (Admin)</h3>
@@ -100,6 +99,7 @@ box-shadow:0px 2px 5px rgba(0,0,0,0.1);
 <button onclick="addScholarship()">Add Scholarship</button>
 
 </div>
+
 <h3>Saved Scholarships</h3>
 
 <div id="saved-list"></div>
@@ -146,15 +146,16 @@ appId: "1:807575045909:web:9a61a548638423d7988b1c"
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
 const adminEmail = "lethabophenyo53@gmail.com";
 
-let allScholarships=[];
+let allScholarships = [];
 
 async function loadScholarships(){
 
 const querySnapshot = await getDocs(collection(db,"scholarship"));
 
-const list=document.getElementById("scholarship-list");
+const list = document.getElementById("scholarship-list");
 
 list.innerHTML="";
 allScholarships=[];
@@ -256,14 +257,12 @@ const degree=document.getElementById("degreeScholarship").value;
 const link=document.getElementById("link").value;
 
 await addDoc(collection(db,"scholarship"),{
-
 title,
 description,
 country,
 field,
 degree,
 link
-
 });
 
 alert("Scholarship Added");
@@ -380,7 +379,11 @@ signInWithEmailAndPassword(auth,email,password)
 }
 
 window.logout=function(){
+
+document.getElementById("admin-section").style.display="none";
+
 signOut(auth);
+
 }
 
 onAuthStateChanged(auth,(user)=>{
@@ -391,15 +394,15 @@ document.getElementById("auth-section").style.display="none";
 document.getElementById("user-section").style.display="block";
 
 document.getElementById("welcome").innerText="Welcome "+user.email;
-  
+
 if(user.email === adminEmail){
-document.getElementById("admin-section").style.display = "block";
+document.getElementById("admin-section").style.display="block";
 }
+
 loadScholarships();
 loadSavedScholarships();
 
 }
-
 else{
 
 document.getElementById("auth-section").style.display="block";
