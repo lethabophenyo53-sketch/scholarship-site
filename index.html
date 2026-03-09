@@ -59,9 +59,7 @@ box-shadow:0px 2px 5px rgba(0,0,0,0.1);
 <h3>Your Profile</h3>
 
 <input type="text" id="country" placeholder="Country"><br><br>
-
 <input type="text" id="field" placeholder="Field of Study"><br><br>
-
 <input type="text" id="degree" placeholder="Degree Level"><br><br>
 
 <button onclick="saveProfile()">Save Profile</button>
@@ -70,12 +68,7 @@ box-shadow:0px 2px 5px rgba(0,0,0,0.1);
 
 <h3>Available Scholarships</h3>
 
-<input 
-type="text"
-id="search"
-placeholder="Search scholarships..."
-onkeyup="searchScholarships()"
->
+<input type="text" id="search" placeholder="Search scholarships..." onkeyup="searchScholarships()">
 
 <br><br>
 
@@ -89,15 +82,10 @@ onkeyup="searchScholarships()"
 <h3>Add Scholarship (Admin)</h3>
 
 <input type="text" id="title" placeholder="Scholarship Title"><br><br>
-
 <input type="text" id="description" placeholder="Description"><br><br>
-
 <input type="text" id="countryScholarship" placeholder="Country"><br><br>
-
 <input type="text" id="fieldScholarship" placeholder="Field of Study"><br><br>
-
 <input type="text" id="degreeScholarship" placeholder="Degree Level"><br><br>
-
 <input type="text" id="link" placeholder="Application Link"><br><br>
 
 <button onclick="addScholarship()">Add Scholarship</button>
@@ -131,7 +119,8 @@ collection,
 getDocs,
 addDoc,
 setDoc,
-doc
+doc,
+getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 
@@ -144,26 +133,24 @@ messagingSenderId: "807575045909",
 appId: "1:807575045909:web:9a61a548638423d7988b1c"
 };
 
-
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-let allScholarships = [];
-
+let allScholarships=[];
 
 async function loadScholarships(){
 
 const querySnapshot = await getDocs(collection(db,"scholarship"));
 
-const list = document.getElementById("scholarship-list");
+const list=document.getElementById("scholarship-list");
 
 list.innerHTML="";
 allScholarships=[];
 
 querySnapshot.forEach((doc)=>{
 
-const data = doc.data();
+const data=doc.data();
 allScholarships.push(data);
 
 displayScholarship(data);
@@ -172,12 +159,11 @@ displayScholarship(data);
 
 }
 
-
 function displayScholarship(data){
 
-const list = document.getElementById("scholarship-list");
+const list=document.getElementById("scholarship-list");
 
-list.innerHTML += `
+list.innerHTML+=`
 
 <div class="scholarship">
 
@@ -186,15 +172,11 @@ list.innerHTML += `
 <p>${data.description}</p>
 
 <a href="${data.link}" target="_blank">
-
 <button>Apply Now</button>
-
 </a>
 
 <button onclick="saveScholarship('${data.title}','${data.description}','${data.link}')">
-
 Save
-
 </button>
 
 </div>
@@ -203,11 +185,9 @@ Save
 
 }
 
-
 window.searchScholarships=function(){
 
 const keyword=document.getElementById("search").value.toLowerCase();
-
 const list=document.getElementById("scholarship-list");
 
 list.innerHTML="";
@@ -225,47 +205,37 @@ displayScholarship(s);
 
 }
 
+window.matchScholarships=async function(){
 
-window.matchScholarships = async function(){
-
-const user = auth.currentUser;
+const user=auth.currentUser;
 
 if(!user) return;
 
-const profileDoc = await getDocs(collection(db,"profiles"));
+const profileRef=doc(db,"profiles",user.uid);
+const profileSnap=await getDoc(profileRef);
 
-profileDoc.forEach((docData)=>{
+if(!profileSnap.exists()) return;
 
-if(docData.id === user.uid){
-
-const profile = docData.data();
+const profile=profileSnap.data();
 
 const list=document.getElementById("scholarship-list");
-
 list.innerHTML="";
 
 allScholarships.forEach((s)=>{
 
 if(
-s.country.toLowerCase() === profile.country.toLowerCase() &&
-s.field.toLowerCase() === profile.field.toLowerCase() &&
-s.degree.toLowerCase() === profile.degree.toLowerCase()
+s.country.toLowerCase()===profile.country.toLowerCase() &&
+s.field.toLowerCase()===profile.field.toLowerCase() &&
+s.degree.toLowerCase()===profile.degree.toLowerCase()
 ){
-
 displayScholarship(s);
-
 }
 
 });
 
 }
 
-});
-
-}
-
-
-window.addScholarship = async function(){
+window.addScholarship=async function(){
 
 const title=document.getElementById("title").value;
 const description=document.getElementById("description").value;
@@ -276,12 +246,12 @@ const link=document.getElementById("link").value;
 
 await addDoc(collection(db,"scholarship"),{
 
-title:title,
-description:description,
-country:country,
-field:field,
-degree:degree,
-link:link
+title,
+description,
+country,
+field,
+degree,
+link
 
 });
 
@@ -291,10 +261,9 @@ loadScholarships();
 
 }
 
+window.saveScholarship=async function(title,description,link){
 
-window.saveScholarship = async function(title,description,link){
-
-const user = auth.currentUser;
+const user=auth.currentUser;
 
 if(!user){
 alert("Login first");
@@ -303,9 +272,9 @@ return;
 
 await addDoc(collection(db,"savedScholarships"),{
 user:user.email,
-title:title,
-description:description,
-link:link
+title,
+description,
+link
 });
 
 alert("Scholarship Saved");
@@ -314,14 +283,13 @@ loadSavedScholarships();
 
 }
 
-
 async function loadSavedScholarships(){
 
-const user = auth.currentUser;
+const user=auth.currentUser;
 
 if(!user) return;
 
-const querySnapshot = await getDocs(collection(db,"savedScholarships"));
+const querySnapshot=await getDocs(collection(db,"savedScholarships"));
 
 const list=document.getElementById("saved-list");
 
@@ -342,9 +310,7 @@ list.innerHTML+=`
 <p>${data.description}</p>
 
 <a href="${data.link}" target="_blank">
-
 <button>Apply</button>
-
 </a>
 
 </div>
@@ -357,10 +323,9 @@ list.innerHTML+=`
 
 }
 
+window.saveProfile=async function(){
 
-window.saveProfile = async function(){
-
-const user = auth.currentUser;
+const user=auth.currentUser;
 
 if(!user){
 alert("Login first");
@@ -372,15 +337,14 @@ const field=document.getElementById("field").value;
 const degree=document.getElementById("degree").value;
 
 await setDoc(doc(db,"profiles",user.uid),{
-country:country,
-field:field,
-degree:degree
+country,
+field,
+degree
 });
 
 alert("Profile Saved");
 
 }
-
 
 window.signUp=function(){
 
@@ -393,7 +357,6 @@ createUserWithEmailAndPassword(auth,email,password)
 
 }
 
-
 window.login=function(){
 
 const email=document.getElementById("email").value;
@@ -405,11 +368,9 @@ signInWithEmailAndPassword(auth,email,password)
 
 }
 
-
 window.logout=function(){
 signOut(auth);
 }
-
 
 onAuthStateChanged(auth,(user)=>{
 
@@ -417,6 +378,7 @@ if(user){
 
 document.getElementById("auth-section").style.display="none";
 document.getElementById("user-section").style.display="block";
+
 document.getElementById("welcome").innerText="Welcome "+user.email;
 
 loadScholarships();
