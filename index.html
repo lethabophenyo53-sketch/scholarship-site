@@ -4,6 +4,7 @@
 <title>Scholar Match</title>
 
 <style>
+
 body{
 font-family: Arial;
 text-align:center;
@@ -32,6 +33,7 @@ width:300px;
 border-radius:8px;
 box-shadow:0px 2px 5px rgba(0,0,0,0.1);
 }
+
 </style>
 </head>
 
@@ -51,7 +53,6 @@ box-shadow:0px 2px 5px rgba(0,0,0,0.1);
 
 </div>
 
-
 <div id="user-section" style="display:none;">
 
 <h2 id="welcome"></h2>
@@ -67,19 +68,16 @@ box-shadow:0px 2px 5px rgba(0,0,0,0.1);
 <br><br>
 
 <h3>Available Scholarships</h3>
-  
-  <h4>Filter Scholarships</h4>
+
+<h4>Filter Scholarships</h4>
 
 <input type="text" id="filterCountry" placeholder="Filter by Country">
-
 <input type="text" id="filterField" placeholder="Filter by Field">
-
 <input type="text" id="filterDegree" placeholder="Filter by Degree">
 
 <br><br>
 
 <button onclick="filterScholarships()">Apply Filter</button>
-
 <button onclick="loadScholarships()">Clear Filter</button>
 
 <br><br>
@@ -94,7 +92,6 @@ box-shadow:0px 2px 5px rgba(0,0,0,0.1);
 
 <div id="scholarship-list"></div>
 
-  
 <div id="admin-section" style="display:none;">
 
 <h3>Add Scholarship (Admin)</h3>
@@ -109,7 +106,7 @@ box-shadow:0px 2px 5px rgba(0,0,0,0.1);
 
 <input type="text" id="degreeScholarship" placeholder="Degree Level"><br><br>
 
-  <input type="date" id="deadline"><br>
+<input type="date" id="deadline"><br><br>
 
 <input type="text" id="link" placeholder="Application Link"><br><br>
 
@@ -126,7 +123,6 @@ box-shadow:0px 2px 5px rgba(0,0,0,0.1);
 <button onclick="logout()">Logout</button>
 
 </div>
-
 
 <script type="module">
 
@@ -151,6 +147,7 @@ getDoc,
 deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+
 const firebaseConfig = {
 apiKey: "AIzaSyDB94Hy6sFUBXE4ObSOQmPW5As4Fbxaoi4",
 authDomain: "scholarship-platform-ec01f.firebaseapp.com",
@@ -167,6 +164,7 @@ const db = getFirestore(app);
 const adminEmail = "lethabophenyo53@gmail.com";
 
 let allScholarships = [];
+
 
 async function loadScholarships(){
 
@@ -190,6 +188,7 @@ displayScholarship(data);
 
 }
 
+
 function displayScholarship(data){
 
 const list=document.getElementById("scholarship-list");
@@ -206,7 +205,7 @@ list.innerHTML += `
 
 <h4>${data.title}</h4>
 
-<p><b>Deadline:</b> ${data.deadline}</p>
+<p><b>Deadline:</b> ${data.deadline || "Not specified"}</p>
 
 <p>${data.description}</p>
 
@@ -214,7 +213,7 @@ list.innerHTML += `
 <button>Apply Now</button>
 </a>
 
-<button onclick="saveScholarship('${data.title}','${data.description}','${data.link}')">
+<button onclick="saveScholarship('${data.title}','${data.description}','${data.link}','${data.deadline}')">
 Save
 </button>
 
@@ -225,8 +224,9 @@ ${deleteButton}
 `;
 
 }
-  
-  window.filterScholarships = function(){
+
+
+window.filterScholarships = function(){
 
 const country = document.getElementById("filterCountry").value.toLowerCase();
 const field = document.getElementById("filterField").value.toLowerCase();
@@ -240,15 +240,15 @@ allScholarships.forEach((s)=>{
 
 let match = true;
 
-if(country && !s.country.toLowerCase().includes(country)){
+if(country && s.country && !s.country.toLowerCase().includes(country)){
 match = false;
 }
 
-if(field && !s.field.toLowerCase().includes(field)){
+if(field && s.field && !s.field.toLowerCase().includes(field)){
 match = false;
 }
 
-if(degree && !s.degree.toLowerCase().includes(degree)){
+if(degree && s.degree && !s.degree.toLowerCase().includes(degree)){
 match = false;
 }
 
@@ -259,6 +259,8 @@ displayScholarship(s);
 });
 
 }
+
+
 window.searchScholarships=function(){
 
 const keyword=document.getElementById("search").value.toLowerCase();
@@ -269,8 +271,8 @@ list.innerHTML="";
 allScholarships.forEach((s)=>{
 
 if(
-s.title.toLowerCase().includes(keyword) ||
-s.description.toLowerCase().includes(keyword)
+(s.title && s.title.toLowerCase().includes(keyword)) ||
+(s.description && s.description.toLowerCase().includes(keyword))
 ){
 displayScholarship(s);
 }
@@ -278,6 +280,7 @@ displayScholarship(s);
 });
 
 }
+
 
 window.matchScholarships=async function(){
 
@@ -298,9 +301,9 @@ list.innerHTML="";
 allScholarships.forEach((s)=>{
 
 if(
-s.country.toLowerCase()===profile.country.toLowerCase() &&
-s.field.toLowerCase()===profile.field.toLowerCase() &&
-s.degree.toLowerCase()===profile.degree.toLowerCase()
+s.country?.toLowerCase()===profile.country?.toLowerCase() &&
+s.field?.toLowerCase()===profile.field?.toLowerCase() &&
+s.degree?.toLowerCase()===profile.degree?.toLowerCase()
 ){
 displayScholarship(s);
 }
@@ -308,6 +311,7 @@ displayScholarship(s);
 });
 
 }
+
 
 window.addScholarship=async function(){
 
@@ -335,7 +339,8 @@ loadScholarships();
 
 }
 
-window.saveScholarship=async function(title,description,link){
+
+window.saveScholarship=async function(title,description,link,deadline){
 
 const user=auth.currentUser;
 
@@ -348,7 +353,8 @@ await addDoc(collection(db,"savedScholarships"),{
 user:user.email,
 title,
 description,
-link
+link,
+deadline
 });
 
 alert("Scholarship Saved");
@@ -356,6 +362,8 @@ alert("Scholarship Saved");
 loadSavedScholarships();
 
 }
+
+
 window.deleteScholarship = async function(id){
 
 await deleteDoc(doc(db,"scholarship",id));
@@ -365,6 +373,8 @@ alert("Scholarship Deleted");
 loadScholarships();
 
 }
+
+
 async function loadSavedScholarships(){
 
 const user=auth.currentUser;
@@ -389,7 +399,7 @@ list.innerHTML+=`
 
 <h4>${data.title}</h4>
 
-<p><b>Deadline:</b> ${data.deadline}</p>
+<p><b>Deadline:</b> ${data.deadline || "Not specified"}</p>
 
 <p>${data.description}</p>
 
@@ -406,6 +416,7 @@ list.innerHTML+=`
 });
 
 }
+
 
 window.saveProfile=async function(){
 
@@ -430,6 +441,7 @@ alert("Profile Saved");
 
 }
 
+
 window.signUp=function(){
 
 const email=document.getElementById("email").value;
@@ -440,6 +452,7 @@ createUserWithEmailAndPassword(auth,email,password)
 .catch(error=>alert(error.message));
 
 }
+
 
 window.login=function(){
 
@@ -452,6 +465,7 @@ signInWithEmailAndPassword(auth,email,password)
 
 }
 
+
 window.logout=function(){
 
 document.getElementById("admin-section").style.display="none";
@@ -459,6 +473,7 @@ document.getElementById("admin-section").style.display="none";
 signOut(auth);
 
 }
+
 
 onAuthStateChanged(auth,(user)=>{
 
