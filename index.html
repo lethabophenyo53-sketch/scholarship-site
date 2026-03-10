@@ -129,9 +129,9 @@ getDocs,
 addDoc,
 setDoc,
 doc,
-getDoc
+getDoc,
+deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
 
 const firebaseConfig = {
 apiKey: "AIzaSyDB94Hy6sFUBXE4ObSOQmPW5As4Fbxaoi4",
@@ -159,9 +159,11 @@ const list = document.getElementById("scholarship-list");
 list.innerHTML="";
 allScholarships=[];
 
-querySnapshot.forEach((doc)=>{
+querySnapshot.forEach((docSnap)=>{
 
-const data=doc.data();
+const data = docSnap.data();
+data.id = docSnap.id;
+
 allScholarships.push(data);
 
 displayScholarship(data);
@@ -174,7 +176,13 @@ function displayScholarship(data){
 
 const list=document.getElementById("scholarship-list");
 
-list.innerHTML+=`
+let deleteButton = "";
+
+if(auth.currentUser && auth.currentUser.email === adminEmail){
+deleteButton = `<button onclick="deleteScholarship('${data.id}')">Delete</button>`;
+}
+
+list.innerHTML += `
 
 <div class="scholarship">
 
@@ -190,12 +198,13 @@ list.innerHTML+=`
 Save
 </button>
 
+${deleteButton}
+
 </div>
 
 `;
 
 }
-
 window.searchScholarships=function(){
 
 const keyword=document.getElementById("search").value.toLowerCase();
@@ -291,7 +300,15 @@ alert("Scholarship Saved");
 loadSavedScholarships();
 
 }
+window.deleteScholarship = async function(id){
 
+await deleteDoc(doc(db,"scholarship",id));
+
+alert("Scholarship Deleted");
+
+loadScholarships();
+
+}
 async function loadSavedScholarships(){
 
 const user=auth.currentUser;
