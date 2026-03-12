@@ -11,54 +11,61 @@
 body{
 font-family:'Montserrat',sans-serif;
 margin:0;
-background:url("https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1600&q=80");
-background-size:cover;
+background:linear-gradient(135deg,#4c1d95,#7c3aed);
+min-height:100vh;
 }
 
 .container{
 max-width:1100px;
 margin:auto;
-background:white;
 padding:30px;
-margin-top:40px;
+background:white;
 border-radius:12px;
+margin-top:40px;
+box-shadow:0 10px 40px rgba(0,0,0,0.2);
 }
 
 .hero{
 text-align:center;
-padding:40px;
-background:#1B1F3B;
+padding:50px;
+background:linear-gradient(135deg,#7c3aed,#9333ea);
 color:white;
 border-radius:10px;
+margin-bottom:30px;
 }
 
 input{
-padding:10px;
+padding:12px;
 margin:6px;
 border-radius:6px;
 border:1px solid #ccc;
 }
 
 button{
-padding:10px 18px;
-background:#6C63FF;
-color:white;
+padding:10px 20px;
 border:none;
 border-radius:6px;
+background:#7c3aed;
+color:white;
 cursor:pointer;
 }
 
-.scholarship{
-border:1px solid #ddd;
-padding:15px;
-margin:10px;
-border-radius:8px;
-width:280px;
+button:hover{
+background:#6d28d9;
 }
 
 .scholarship-list{
 display:flex;
 flex-wrap:wrap;
+}
+
+.scholarship{
+width:260px;
+border:1px solid #eee;
+padding:15px;
+margin:10px;
+border-radius:10px;
+background:#faf5ff;
 }
 
 #user-section{
@@ -74,16 +81,16 @@ display:none;
 
 <div class="hero">
 <h1>Scholar Match</h1>
-<p>Find Scholarships For Primary, High School & University</p>
+<p>Find scholarships for Primary, High School & University students</p>
 </div>
 
-<h3>Login / Sign Up</h3>
+<h3>Login / Signup</h3>
 
 <input id="email" placeholder="Email"><br>
 <input id="password" type="password" placeholder="Password"><br>
 
-<button onclick="signUp()">Sign Up</button>
-<button onclick="login()">Login</button>
+<button id="signupBtn">Sign Up</button>
+<button id="loginBtn">Login</button>
 
 <div id="user-section">
 
@@ -91,20 +98,22 @@ display:none;
 
 <h3>Add Scholarship</h3>
 
-<input id="title" placeholder="Title"><br>
+<input id="title" placeholder="Scholarship title"><br>
 <input id="description" placeholder="Description"><br>
-<input id="countryScholarship" placeholder="Country"><br>
-<input id="fieldScholarship" placeholder="Field"><br>
-<input id="degreeScholarship" placeholder="Degree"><br>
-<input id="link" placeholder="Application Link"><br>
+<input id="country" placeholder="Country"><br>
+<input id="field" placeholder="Field"><br>
+<input id="degree" placeholder="Degree"><br>
+<input id="link" placeholder="Application link"><br>
 
-<button onclick="addScholarship()">Add Scholarship</button>
+<button id="addScholarshipBtn">Add Scholarship</button>
 
 <h3>Scholarships</h3>
 
 <div id="scholarship-list" class="scholarship-list"></div>
 
-<button onclick="logout()">Logout</button>
+<br>
+
+<button id="logoutBtn">Logout</button>
 
 </div>
 
@@ -114,35 +123,38 @@ display:none;
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 
-import { getAuth,
+import { 
+getAuth,
 createUserWithEmailAndPassword,
 signInWithEmailAndPassword,
 signOut,
-onAuthStateChanged }
+onAuthStateChanged
+}
 
 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-import { getFirestore,
+import {
+getFirestore,
 collection,
 addDoc,
-getDocs }
+getDocs
+}
 
 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-
 const firebaseConfig = {
 
-apiKey:"PASTE_API_KEY",
+apiKey: "PASTE_API_KEY_HERE",
 
-authDomain:"PASTE_AUTH_DOMAIN",
+authDomain: "PASTE_AUTH_DOMAIN",
 
-projectId:"PASTE_PROJECT_ID",
+projectId: "PASTE_PROJECT_ID",
 
-storageBucket:"PASTE_BUCKET",
+storageBucket: "PASTE_BUCKET",
 
-messagingSenderId:"PASTE_ID",
+messagingSenderId: "PASTE_ID",
 
-appId:"PASTE_APP_ID"
+appId: "PASTE_APP_ID"
 
 };
 
@@ -152,35 +164,46 @@ const auth = getAuth(app);
 
 const db = getFirestore(app);
 
-window.signUp = async function(){
+const email = document.getElementById("email");
+const password = document.getElementById("password");
 
-const email=document.getElementById("email").value;
+document.getElementById("signupBtn").onclick = async () => {
 
-const password=document.getElementById("password").value;
+try{
 
-await createUserWithEmailAndPassword(auth,email,password);
+await createUserWithEmailAndPassword(auth,email.value,password.value);
 
 alert("Account created");
 
-}
+}catch(e){
 
-window.login = async function(){
-
-const email=document.getElementById("email").value;
-
-const password=document.getElementById("password").value;
-
-await signInWithEmailAndPassword(auth,email,password);
+alert(e.message)
 
 }
 
-window.logout = function(){
+}
 
-signOut(auth);
+document.getElementById("loginBtn").onclick = async () => {
+
+try{
+
+await signInWithEmailAndPassword(auth,email.value,password.value);
+
+}catch(e){
+
+alert(e.message)
 
 }
 
-onAuthStateChanged(auth,(user)=>{
+}
+
+document.getElementById("logoutBtn").onclick = () => {
+
+signOut(auth)
+
+}
+
+onAuthStateChanged(auth,user=>{
 
 if(user){
 
@@ -190,7 +213,9 @@ document.getElementById("welcome").innerText="Welcome "+user.email;
 
 loadScholarships();
 
-}else{
+}
+
+else{
 
 document.getElementById("user-section").style.display="none";
 
@@ -198,19 +223,21 @@ document.getElementById("user-section").style.display="none";
 
 })
 
-window.addScholarship = async function(){
+document.getElementById("addScholarshipBtn").onclick = async () => {
 
 const title=document.getElementById("title").value;
 
 const description=document.getElementById("description").value;
 
-const country=document.getElementById("countryScholarship").value;
+const country=document.getElementById("country").value;
 
-const field=document.getElementById("fieldScholarship").value;
+const field=document.getElementById("field").value;
 
-const degree=document.getElementById("degreeScholarship").value;
+const degree=document.getElementById("degree").value;
 
 const link=document.getElementById("link").value;
+
+try{
 
 await addDoc(collection(db,"scholarships"),{
 
@@ -222,17 +249,23 @@ alert("Scholarship added")
 
 loadScholarships()
 
+}catch(e){
+
+alert(e.message)
+
+}
+
 }
 
 async function loadScholarships(){
-
-const querySnapshot=await getDocs(collection(db,"scholarships"));
 
 const list=document.getElementById("scholarship-list");
 
 list.innerHTML="";
 
-querySnapshot.forEach((doc)=>{
+const querySnapshot=await getDocs(collection(db,"scholarships"));
+
+querySnapshot.forEach(doc=>{
 
 const s=doc.data();
 
