@@ -128,7 +128,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDocs, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  const firebaseConfig = {
+const firebaseConfig = {
 apiKey: "AIzaSyDB94Hy6sFUBXE4ObSOQmPW5As4Fbxaoi4",
 authDomain: "scholarship-platform-ec01f.firebaseapp.com",
 projectId: "scholarship-platform-ec01f",
@@ -136,7 +136,6 @@ storageBucket: "scholarship-platform-ec01f.firebasestorage.app",
 messagingSenderId: "807575045909",
 appId: "1:807575045909:web:9a61a548638423d7988b1c"
 };
-
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
