@@ -5,155 +5,130 @@
 <title>Scholar Match</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-
-/* ---------- General Styles ---------- */
-
 body {
-font-family: 'Montserrat', sans-serif;
-margin: 0;
-padding: 0;
-background: url('https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1600&q=80') no-repeat center center fixed;
-background-size: cover;
-color: #333;
-scroll-behavior: smooth;
+    font-family:'Montserrat',sans-serif;
+    margin:0;
+    padding:0;
+    background:url('https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1600&q=80') no-repeat center center fixed;
+    background-size:cover;
+    color:#333;
+    scroll-behavior:smooth;
 }
-
-/* MAIN CONTAINER */
-
 .container{
-max-width:1100px;
-margin:auto;
-background:rgba(255,255,255,0.95);
-padding:30px;
-margin-top:40px;
-border-radius:12px;
-box-shadow:0 10px 40px rgba(0,0,0,0.25);
+    max-width:1100px;
+    margin:auto;
+    background:rgba(255,255,255,0.95);
+    padding:30px;
+    margin-top:40px;
+    border-radius:12px;
+    box-shadow:0 10px 40px rgba(0,0,0,0.25);
 }
-
-/* HERO SECTION */
-
 .hero{
-text-align:center;
-background:rgba(27,31,59,0.85);
-color:white;
-padding:60px;
-border-radius:10px;
-margin-bottom:40px;
+    text-align:center;
+    background:rgba(27,31,59,0.85);
+    color:white;
+    padding:60px;
+    border-radius:10px;
+    margin-bottom:40px;
 }
-
 .hero button{
-margin-top:20px;
-padding:14px 28px;
-font-size:18px;
+    margin-top:20px;
+    padding:14px 28px;
+    font-size:18px;
+    border:none;
+    border-radius:50px;
+    background:linear-gradient(135deg,#7c3aed,#9333ea);
+    color:white;
+    cursor:pointer;
+    font-weight:700;
 }
-
-/* LOGIN AREA */
-
-.auth{
-text-align:center;
-margin-bottom:40px;
+.hero button:hover{transform:scale(1.05);}
+.auth{text-align:center;margin-bottom:40px;}
+.auth input{padding:12px;margin:8px;border-radius:8px;border:1px solid #ddd;width:240px;}
+.auth button{padding:12px 25px;border:none;border-radius:8px;background:linear-gradient(135deg,#7c3aed,#9333ea);color:white;cursor:pointer;font-weight:600;transition:0.2s;}
+.auth button:hover{transform:scale(1.05);background:#574fd6;}
+.scholarship-list{display:flex;flex-wrap:wrap;justify-content:center;}
+.scholarship{background:white;border:1px solid #ddd;padding:15px;margin:10px;border-radius:10px;width:260px;box-shadow:0 5px 15px rgba(0,0,0,0.1);}
+#user-section{display:none;text-align:center;}
+#user-section input{margin:6px;padding:10px;border-radius:6px;border:1px solid #ccc;}
+#user-section button{margin:10px;padding:12px 25px;border:none;border-radius:8px;background:linear-gradient(135deg,#7c3aed,#9333ea);color:white;cursor:pointer;font-weight:600;}
+#user-section button:hover{transform:scale(1.05);background:#574fd6;}
+@media(max-width:768px){
+    .auth input,#user-section input{width:90%;}
+    .scholarship{width:90%;}
+    .hero{padding:40px;}
+    .hero h1{font-size:40px;}
 }
-
-/* INPUTS */
-
-input{
-padding:12px;
-margin:8px;
-border-radius:8px;
-border:1px solid #ddd;
-width:240px;
-}
-
-/* BUTTONS */
-
-button{
-padding:12px 20px;
-border:none;
-border-radius:8px;
-background:#6C63FF;
-color:white;
-cursor:pointer;
-font-weight:600;
-transition:0.2s;
-}
-
-button:hover{
-transform:scale(1.05);
-background:#574fd6;
-}
-
-/* SCHOLARSHIP GRID */
-
-.scholarship-list{
-display:flex;
-flex-wrap:wrap;
-justify-content:center;
-}
-
-/* SCHOLARSHIP CARD */
-
-.scholarship{
-background:white;
-border:1px solid #ddd;
-padding:15px;
-margin:10px;
-border-radius:10px;
-width:260px;
-box-shadow:0 5px 15px rgba(0,0,0,0.1);
-}
-
-/* USER AREA */
-
-#user-section{
-display:none;
-text-align:center;
-}
-
 </style>
 </head>
 <body>
 <div class="container">
+
 <div class="hero">
 <h1>Scholar Match</h1>
 <p>Find scholarships for Primary, High School & University students</p>
+<button onclick="scrollToScholarships()">Start Now</button>
 </div>
+
 <!-- LOGIN / SIGNUP -->
 <div class="auth">
 <h3>Login / Sign Up</h3>
+<input id="email" type="email" placeholder="Email"><br>
+<input id="password" type="password" placeholder="Password"><br>
+<button id="signupBtn">Sign Up</button>
+<button id="loginBtn">Login</button>
 </div>
+
+<!-- USER SECTION -->
 <div id="user-section">
 <h2 id="welcome"></h2>
+
+<h3>Profile</h3>
+<input id="country" placeholder="Country"><br>
+<input id="field" placeholder="Field (e.g. Science, Arts)"><br>
+<input id="degree" placeholder="Degree Level (Primary, High School, University)"><br>
+<input id="age" type="number" placeholder="Age"><br>
+<input id="grade" placeholder="Grade (e.g. Grade 6, 12, N/A)"><br>
+<button id="saveProfileBtn">Save Profile</button>
+
 <h3>Add Scholarship</h3>
-<h3>Available Scholarships</h3>
+<input id="title" placeholder="Scholarship Title"><br>
+<input id="description" placeholder="Description"><br>
+<input id="countryScholarship" placeholder="Country"><br>
+<input id="fieldScholarship" placeholder="Field"><br>
+<input id="degreeScholarship" placeholder="Degree Level"><br>
+<input id="minAge" type="number" placeholder="Minimum Age"><br>
+<input id="maxAge" type="number" placeholder="Maximum Age"><br>
+<input id="gradeScholarship" placeholder="Grade (e.g. Grade 12, N/A)"><br>
+<input id="link" placeholder="Application Link"><br>
+<button id="addScholarshipBtn">Add Scholarship</button>
+
+<h3 id="scholarships">Available Scholarships</h3>
+
+<h4>Filter Scholarships</h4>
+<input id="filterCountry" placeholder="Filter by Country">
+<input id="filterField" placeholder="Filter by Field">
+<input id="filterDegree" placeholder="Filter by Degree">
+<input id="filterAge" type="number" placeholder="Filter by Age">
+<input id="filterGrade" placeholder="Filter by Grade"><br>
+<button id="filterBtn">Apply Filter</button>
+<button id="clearFilterBtn">Clear Filter</button>
+
+<input id="search" placeholder="Search scholarships..." onkeyup="searchScholarships()"><br><br>
+
 <div id="scholarship-list" class="scholarship-list"></div>
-<br>
+
+<button id="logoutBtn">Logout</button>
 </div>
+
 </div>
+
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-import {
-getAuth,
-createUserWithEmailAndPassword,
-signInWithEmailAndPassword,
-signOut,
-onAuthStateChanged
-}
-
-from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-import {
-getFirestore,
-collection,
-addDoc,
-getDocs
-}
-
-from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-
-const firebaseConfig = {
+  const firebaseConfig = {
 apiKey: "AIzaSyDB94Hy6sFUBXE4ObSOQmPW5As4Fbxaoi4",
 authDomain: "scholarship-platform-ec01f.firebaseapp.com",
 projectId: "scholarship-platform-ec01f",
@@ -162,175 +137,135 @@ messagingSenderId: "807575045909",
 appId: "1:807575045909:web:9a61a548638423d7988b1c"
 };
 
+
 const app = initializeApp(firebaseConfig);
-
 const auth = getAuth(app);
-
 const db = getFirestore(app);
 
-
-/* SCROLL BUTTON */
-
+// ---------- Scroll ----------
 window.scrollToScholarships=function(){
-
-document.getElementById("scholarship-list").scrollIntoView({behavior:"smooth"});
-
+document.getElementById("scholarships").scrollIntoView({behavior:"smooth"});
 }
 
-
-const email=document.getElementById("email");
-const password=document.getElementById("password");
-
-
-/* SIGNUP */
-
-document.getElementById("signupBtn").onclick=async()=>{
-
-if(!email.value || !password.value){
-alert("Please enter email and password");
-return;
+// ---------- Sign Up ----------
+document.getElementById("signupBtn").onclick = async ()=>{
+    const email=document.getElementById("email").value;
+    const password=document.getElementById("password").value;
+    if(!email||!password){alert("Enter email & password"); return;}
+    try{ await createUserWithEmailAndPassword(auth,email,password); alert("Account created"); } 
+    catch(e){alert(e.message);}
 }
 
-try{
-
-await createUserWithEmailAndPassword(auth,email.value,password.value);
-
-alert("Account created");
-
-}catch(error){
-
-alert(error.message);
-
+// ---------- Login ----------
+document.getElementById("loginBtn").onclick = async ()=>{
+    const email=document.getElementById("email").value;
+    const password=document.getElementById("password").value;
+    if(!email||!password){alert("Enter email & password"); return;}
+    try{ await signInWithEmailAndPassword(auth,email,password);} 
+    catch(e){alert(e.message);}
 }
 
+// ---------- Logout ----------
+document.getElementById("logoutBtn").onclick = ()=>{signOut(auth);}
+
+// ---------- Save Profile ----------
+document.getElementById("saveProfileBtn").onclick = async ()=>{
+    const user = auth.currentUser;
+    if(!user){alert("Login first"); return;}
+    await setDoc(doc(db,"profiles",user.uid),{
+        country:document.getElementById("country").value,
+        field:document.getElementById("field").value,
+        degree:document.getElementById("degree").value,
+        age:document.getElementById("age").value,
+        grade:document.getElementById("grade").value
+    });
+    alert("Profile saved");
 }
 
-
-/* LOGIN */
-
-document.getElementById("loginBtn").onclick=async()=>{
-
-try{
-
-await signInWithEmailAndPassword(auth,email.value,password.value);
-
-}catch(error){
-
-alert(error.message);
-
-}
-
-}
-
-
-/* LOGOUT */
-
-document.getElementById("logoutBtn").onclick=()=>{
-
-signOut(auth);
-
-}
-
-
-/* AUTH STATE */
-
+// ---------- Auth State ----------
 onAuthStateChanged(auth,user=>{
-
-if(user){
-
-document.getElementById("user-section").style.display="block";
-
-document.getElementById("welcome").innerText="Welcome "+user.email;
-
-loadScholarships();
-
-}else{
-
-document.getElementById("user-section").style.display="none";
-
-}
-
+    if(user){
+        document.getElementById("user-section").style.display="block";
+        document.querySelector(".auth").style.display="none";
+        document.getElementById("welcome").innerText="Welcome "+user.email;
+        loadScholarships();
+    }else{
+        document.getElementById("user-section").style.display="none";
+        document.querySelector(".auth").style.display="block";
+    }
 });
 
+// ---------- Add Scholarship ----------
+document.getElementById("addScholarshipBtn").onclick = async ()=>{
+    const title=document.getElementById("title").value;
+    const description=document.getElementById("description").value;
+    const country=document.getElementById("countryScholarship").value;
+    const field=document.getElementById("fieldScholarship").value;
+    const degree=document.getElementById("degreeScholarship").value;
+    const minAge=document.getElementById("minAge").value;
+    const maxAge=document.getElementById("maxAge").value;
+    const grade=document.getElementById("gradeScholarship").value;
+    const link=document.getElementById("link").value;
 
-/* ADD SCHOLARSHIP */
+    if(!title||!description){alert("Fill required fields"); return;}
 
-document.getElementById("addScholarshipBtn").onclick=async()=>{
-
-const title=document.getElementById("title").value;
-const description=document.getElementById("description").value;
-const country=document.getElementById("country").value;
-const field=document.getElementById("field").value;
-const degree=document.getElementById("degree").value;
-const link=document.getElementById("link").value;
-
-if(!title || !description){
-alert("Please fill required fields");
-return;
+    await addDoc(collection(db,"scholarships"),{
+        title,description,country,field,degree,minAge,maxAge,grade,link
+    });
+    alert("Scholarship added");
+    loadScholarships();
 }
 
-try{
-
-await addDoc(collection(db,"scholarships"),{
-
-title,description,country,field,degree,link
-
-});
-
-alert("Scholarship added");
-
-loadScholarships();
-
-}catch(error){
-
-alert(error.message);
-
-}
-
-}
-
-
-/* LOAD SCHOLARSHIPS */
-
+// ---------- Load Scholarships ----------
 async function loadScholarships(){
-
-const list=document.getElementById("scholarship-list");
-
-list.innerHTML="";
-
-const querySnapshot=await getDocs(collection(db,"scholarships"));
-
-querySnapshot.forEach(doc=>{
-
-const s=doc.data();
-
-const div=document.createElement("div");
-
-div.className="scholarship";
-
-div.innerHTML=`
-
-<h4>${s.title}</h4>
-
-<p>${s.description}</p>
-
-<p><b>Country:</b> ${s.country}</p>
-
-<p><b>Field:</b> ${s.field}</p>
-
-<p><b>Degree:</b> ${s.degree}</p>
-
-<a href="${s.link}" target="_blank">Apply</a>
-
-`;
-
-list.appendChild(div);
-
-});
-
+    const list=document.getElementById("scholarship-list");
+    list.innerHTML="";
+    const snapshot=await getDocs(collection(db,"scholarships"));
+    snapshot.forEach(doc=>{
+        const s=doc.data();
+        const div=document.createElement("div");
+        div.className="scholarship";
+        div.innerHTML=`
+            <h4>${s.title}</h4>
+            <p>${s.description}</p>
+            <p><b>Country:</b> ${s.country}</p>
+            <p><b>Field:</b> ${s.field}</p>
+            <p><b>Degree:</b> ${s.degree}</p>
+            <p><b>Age:</b> ${s.minAge || 'N/A'} - ${s.maxAge || 'N/A'}</p>
+            <p><b>Grade:</b> ${s.grade || 'N/A'}</p>
+            <a href="${s.link}" target="_blank">Apply</a>
+        `;
+        list.appendChild(div);
+    });
 }
 
+// ---------- Search ----------
+window.searchScholarships=function(){
+    const keyword=document.getElementById("search").value.toLowerCase();
+    const list=document.getElementById("scholarship-list");
+    list.innerHTML="";
+    getDocs(collection(db,"scholarships")).then(snapshot=>{
+        snapshot.forEach(doc=>{
+            const s=doc.data();
+            if(
+                s.title.toLowerCase().includes(keyword)||
+                s.description.toLowerCase().includes(keyword)
+            ){
+                const div=document.createElement("div");
+                div.className="scholarship";
+                div.innerHTML=`
+                    <h4>${s.title}</h4>
+                    <p>${s.description}</p>
+                    <p><b>Country:</b> ${s.country}</p>
+                    <p><b>Field:</b> ${s.field}</p>
+                    <p><b>Degree:</b> ${s.degree}</p>
+                    <a href="${s.link}" target="_blank">Apply</a>
+                `;
+                list.appendChild(div);
+            }
+        });
+    });
+}
 </script>
-  
 </body>
 </html>
