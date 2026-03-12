@@ -8,56 +8,63 @@
 
 <style>
 
+/* BODY WITH IMAGE BACKGROUND (LIKE YOUR ORIGINAL) */
 body{
 font-family:'Montserrat',sans-serif;
 margin:0;
-background:linear-gradient(135deg,#4c1d95,#7c3aed);
-min-height:100vh;
+padding:0;
+background:url('https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1600&q=80') no-repeat center center fixed;
+background-size:cover;
 }
 
+/* MAIN CONTAINER */
 .container{
 max-width:1100px;
 margin:auto;
+background:rgba(255,255,255,0.95);
 padding:30px;
-background:white;
-border-radius:12px;
 margin-top:40px;
+border-radius:12px;
 box-shadow:0 10px 40px rgba(0,0,0,0.25);
 }
 
+/* HERO SECTION */
 .hero{
 text-align:center;
-padding:60px;
-background:linear-gradient(135deg,#7c3aed,#9333ea);
+background:rgba(27,31,59,0.85);
 color:white;
+padding:60px;
 border-radius:10px;
 margin-bottom:40px;
 }
 
 .hero button{
 margin-top:20px;
+padding:14px 28px;
 font-size:18px;
-padding:14px 30px;
 }
 
+/* CENTER LOGIN */
 .auth{
 text-align:center;
 margin-bottom:40px;
 }
 
+/* INPUTS */
 input{
 padding:12px;
 margin:8px;
 border-radius:8px;
 border:1px solid #ddd;
-width:220px;
+width:240px;
 }
 
+/* BUTTONS */
 button{
 padding:12px 20px;
 border:none;
 border-radius:8px;
-background:linear-gradient(135deg,#7c3aed,#9333ea);
+background:#6C63FF;
 color:white;
 cursor:pointer;
 font-weight:600;
@@ -66,8 +73,10 @@ transition:0.2s;
 
 button:hover{
 transform:scale(1.05);
+background:#574fd6;
 }
 
+/* SCHOLARSHIP CARDS */
 .scholarship-list{
 display:flex;
 flex-wrap:wrap;
@@ -75,14 +84,15 @@ justify-content:center;
 }
 
 .scholarship{
-width:260px;
-border:1px solid #eee;
+background:white;
+border:1px solid #ddd;
 padding:15px;
 margin:10px;
 border-radius:10px;
-background:#faf5ff;
+width:260px;
 }
 
+/* USER AREA */
 #user-section{
 display:none;
 text-align:center;
@@ -96,15 +106,14 @@ text-align:center;
 <div class="container">
 
 <div class="hero">
-
 <h1>Scholar Match</h1>
-
 <p>Find scholarships for Primary, High School & University students</p>
 
 <button onclick="scrollToScholarships()">Start Now</button>
 
 </div>
 
+<!-- LOGIN / SIGNUP CENTER -->
 <div class="auth">
 
 <h3>Login / Sign Up</h3>
@@ -174,6 +183,8 @@ getDocs
 
 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+/* PUT YOUR FIREBASE KEYS HERE */
+
 const firebaseConfig = {
 
 apiKey:"PASTE_API_KEY",
@@ -191,10 +202,10 @@ appId:"PASTE_APP_ID"
 };
 
 const app = initializeApp(firebaseConfig);
-
 const auth = getAuth(app);
-
 const db = getFirestore(app);
+
+/* START NOW SCROLL */
 
 window.scrollToScholarships=function(){
 
@@ -204,8 +215,9 @@ document.getElementById("scholarship-list")
 }
 
 const email=document.getElementById("email");
-
 const password=document.getElementById("password");
+
+/* SIGNUP */
 
 document.getElementById("signupBtn").onclick=async()=>{
 
@@ -213,7 +225,7 @@ try{
 
 await createUserWithEmailAndPassword(auth,email.value,password.value);
 
-alert("Account created successfully");
+alert("Account created");
 
 }catch(error){
 
@@ -222,6 +234,8 @@ alert(error.message);
 }
 
 }
+
+/* LOGIN */
 
 document.getElementById("loginBtn").onclick=async()=>{
 
@@ -237,11 +251,15 @@ alert(error.message);
 
 }
 
+/* LOGOUT */
+
 document.getElementById("logoutBtn").onclick=()=>{
 
 signOut(auth);
 
 }
+
+/* AUTH STATE */
 
 onAuthStateChanged(auth,user=>{
 
@@ -259,20 +277,17 @@ document.getElementById("user-section").style.display="none";
 
 }
 
-})
+});
+
+/* ADD SCHOLARSHIP */
 
 document.getElementById("addScholarshipBtn").onclick=async()=>{
 
 const title=document.getElementById("title").value;
-
 const description=document.getElementById("description").value;
-
 const country=document.getElementById("country").value;
-
 const field=document.getElementById("field").value;
-
 const degree=document.getElementById("degree").value;
-
 const link=document.getElementById("link").value;
 
 try{
@@ -294,6 +309,8 @@ alert(error.message);
 }
 
 }
+
+/* LOAD SCHOLARSHIPS */
 
 async function loadScholarships(){
 
@@ -329,7 +346,7 @@ div.innerHTML=`
 
 list.appendChild(div);
 
-})
+});
 
 }
 
