@@ -6,7 +6,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-/* ---------- General Styles ---------- */
 body {
     font-family: 'Montserrat', sans-serif;
     margin: 0;
@@ -16,8 +15,6 @@ body {
     color: #333;
     scroll-behavior: smooth;
 }
-
-/* MAIN CONTAINER */
 .container {
     max-width: 1100px;
     margin: 40px auto;
@@ -26,8 +23,6 @@ body {
     border-radius: 12px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.25);
 }
-
-/* HERO SECTION */
 .hero {
     text-align: center;
     background: rgba(27,31,59,0.85);
@@ -47,24 +42,9 @@ body {
     color: white;
     font-weight: 700;
 }
-.hero button:hover {
-    transform: scale(1.05);
-}
-
-/* LOGIN / SIGNUP */
-.auth {
-    text-align: center;
-    margin-bottom: 40px;
-}
-.auth input {
-    padding: 12px;
-    margin: 8px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    width: 250px;
-}
-
-/* BUTTONS */
+.hero button:hover { transform: scale(1.05); }
+.auth { text-align: center; margin-bottom: 40px; }
+.auth input { padding: 12px; margin: 8px; border-radius: 8px; border: 1px solid #ddd; width: 250px; }
 button {
     padding: 12px 20px;
     border: none;
@@ -75,45 +55,13 @@ button {
     font-weight: 600;
     transition: 0.2s;
 }
-button:hover {
-    transform: scale(1.05);
-    background: #574fd6;
-}
-
-/* SCHOLARSHIP GRID */
-.scholarship-list {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-/* SCHOLARSHIP CARD */
+button:hover { transform: scale(1.05); background: #574fd6; }
+.scholarship-list { display: flex; flex-wrap: wrap; justify-content: center; }
 .scholarship {
-    background: white;
-    border: 1px solid #ddd;
-    padding: 15px;
-    margin: 10px;
-    border-radius: 10px;
-    width: 260px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    background:white; border:1px solid #ddd; padding:15px; margin:10px; border-radius:10px; width:260px; box-shadow:0 5px 15px rgba(0,0,0,0.1);
 }
-
-/* USER AREA */
-#user-section {
-    display: none;
-    text-align: center;
-    margin-top: 20px;
-}
-#admin-section {
-    display: none;
-    margin: 20px 0;
-    text-align: center;
-}
-input, select {
-    width: 250px;
-}
-
-/* RESPONSIVE */
+#user-section, #admin-section { display:none; text-align:center; margin-top:20px; }
+input, select { width: 250px; }
 @media (max-width:768px){
     .scholarship { width: 90%; margin:10px auto;}
     input { width: 90%; }
@@ -213,7 +161,6 @@ input, select {
 
 </div>
 
-<!-- FIREBASE SCRIPT -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -231,32 +178,7 @@ appId: "1:807575045909:web:9a61a548638423d7988b1c"
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-
 const adminEmail = "lethabophenyo53@gmail.com";
-let allScholarships = [];
-
-/* SIGNUP */
-document.getElementById("signupBtn").onclick = async () => {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-    if (!email || !password) return alert("Enter email & password");
-    try {
-        await createUserWithEmailAndPassword(auth, email, password);
-        alert("Account created");
-    } catch(e) { alert(e.message); }
-};
-
-/* LOGIN */
-document.getElementById("loginBtn").onclick = async () => {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-    if(!email||!password) return alert("Enter email & password");
-    try { await signInWithEmailAndPassword(auth,email,password); }
-    catch(e){ alert(e.message); }
-};
-
-/* LOGOUT */
-document.getElementById("logoutBtn").onclick = () => signOut(auth);
 
 /* AUTH STATE */
 onAuthStateChanged(auth,user=>{
@@ -265,16 +187,37 @@ onAuthStateChanged(auth,user=>{
         document.getElementById("welcome").innerText="Welcome "+user.email;
         if(user.email === adminEmail) document.getElementById("admin-section").style.display="block";
         loadScholarships();
+        loadSavedScholarships();
     } else {
         document.getElementById("user-section").style.display="none";
         document.getElementById("admin-section").style.display="none";
     }
 });
 
+/* SIGNUP */
+document.getElementById("signupBtn").onclick = async ()=>{
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    if(!email||!password)return alert("Enter email & password");
+    try{ await createUserWithEmailAndPassword(auth,email,password); alert("Account created"); }
+    catch(e){ alert(e.message); }
+};
+
+/* LOGIN */
+document.getElementById("loginBtn").onclick = async ()=>{
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    if(!email||!password)return alert("Enter email & password");
+    try{ await signInWithEmailAndPassword(auth,email,password); }
+    catch(e){ alert(e.message); }
+};
+
+/* LOGOUT */
+document.getElementById("logoutBtn").onclick = ()=>signOut(auth);
+
 /* SAVE PROFILE */
 async function saveProfile(){
-    const user = auth.currentUser;
-    if(!user) return alert("Login first");
+    const user = auth.currentUser; if(!user) return alert("Login first");
     const profile = {
         country: document.getElementById("country").value,
         field: document.getElementById("field").value,
@@ -282,23 +225,23 @@ async function saveProfile(){
         age: document.getElementById("age").value,
         grade: document.getElementById("grade").value
     };
-    await setDoc(doc(db,"profiles",user.uid), profile);
+    await setDoc(doc(db,"profiles",user.uid),profile);
     alert("Profile saved");
 }
 
 /* ADD SCHOLARSHIP */
-document.getElementById("addScholarshipBtn").onclick = async () => {
-    const title = document.getElementById("title").value;
-    const description = document.getElementById("description").value;
-    const country = document.getElementById("countryScholarship").value;
-    const field = document.getElementById("fieldScholarship").value;
-    const qualification = document.getElementById("qualificationScholarship").value;
-    const minAge = document.getElementById("minAge").value;
-    const maxAge = document.getElementById("maxAge").value;
-    const grade = document.getElementById("gradeScholarship").value;
-    const deadline = document.getElementById("deadline").value;
-    const link = document.getElementById("link").value;
-    if(!title || !description) return alert("Fill required fields");
+document.getElementById("addScholarshipBtn").onclick = async ()=>{
+    const title=document.getElementById("title").value;
+    const description=document.getElementById("description").value;
+    const country=document.getElementById("countryScholarship").value;
+    const field=document.getElementById("fieldScholarship").value;
+    const qualification=document.getElementById("qualificationScholarship").value;
+    const minAge=document.getElementById("minAge").value;
+    const maxAge=document.getElementById("maxAge").value;
+    const grade=document.getElementById("gradeScholarship").value;
+    const deadline=document.getElementById("deadline").value;
+    const link=document.getElementById("link").value;
+    if(!title||!description) return alert("Fill required fields");
     await addDoc(collection(db,"scholarships"),{title,description,country,field,qualification,minAge,maxAge,grade,deadline,link});
     alert("Scholarship added");
     loadScholarships();
@@ -306,72 +249,102 @@ document.getElementById("addScholarshipBtn").onclick = async () => {
 
 /* LOAD SCHOLARSHIPS */
 async function loadScholarships(){
-    const list = document.getElementById("scholarship-list");
-    list.innerHTML="";
-    const snapshot = await getDocs(collection(db,"scholarships"));
+    const list=document.getElementById("scholarship-list"); list.innerHTML="";
+    const snapshot=await getDocs(collection(db,"scholarships"));
     snapshot.forEach(docSnap=>{
-        const s = docSnap.data();
-        const div = document.createElement("div");
-        div.className="scholarship";
+        const s=docSnap.data(); const id = docSnap.id;
+        const div=document.createElement("div"); div.className="scholarship";
         div.innerHTML=`
             <h4>${s.title}</h4>
             <p>${s.description}</p>
-            <p><b>Country:</b> ${s.country || "Any"}</p>
-            <p><b>Field:</b> ${s.field || "Any"}</p>
-            <p><b>Level:</b> ${s.qualification || "Any"}</p>
-            <p><b>Age:</b> ${s.minAge || "N/A"} - ${s.maxAge || "N/A"}</p>
-            <p><b>Grade:</b> ${s.grade || "N/A"}</p>
-            <p><b>Deadline:</b> ${s.deadline || "N/A"}</p>
+            <p><b>Country:</b> ${s.country||"Any"}</p>
+            <p><b>Field:</b> ${s.field||"Any"}</p>
+            <p><b>Level:</b> ${s.qualification||"Any"}</p>
+            <p><b>Age:</b> ${s.minAge||"N/A"} - ${s.maxAge||"N/A"}</p>
+            <p><b>Grade:</b> ${s.grade||"N/A"}</p>
+            <p><b>Deadline:</b> ${s.deadline||"N/A"}</p>
             <a href="${s.link}" target="_blank"><button>Apply</button></a>
+            <button onclick="saveScholarship('${id}')">Save Scholarship</button>
+            ${auth.currentUser?.email===adminEmail?`<button onclick="deleteScholarship('${id}')">Delete</button>`:""}
         `;
         list.appendChild(div);
     });
 }
 
-/* SEARCH, FILTER, MATCH FUNCTIONS */
-function searchScholarships(){
-    const keyword = document.getElementById("search").value.toLowerCase();
-    document.querySelectorAll(".scholarship").forEach(card=>{
-        card.style.display = card.innerText.toLowerCase().includes(keyword) ? "inline-block" : "none";
+/* SAVE SCHOLARSHIP */
+async function saveScholarship(id){
+    const user = auth.currentUser; if(!user) return alert("Login first");
+    await setDoc(doc(db,"saved",user.uid+"_"+id),{scholarshipId:id,userId:user.uid});
+    alert("Saved!");
+    loadSavedScholarships();
+}
+
+/* LOAD SAVED SCHOLARSHIPS */
+async function loadSavedScholarships(){
+    const user=auth.currentUser; if(!user) return;
+    const list=document.getElementById("saved-list"); list.innerHTML="";
+    const snapshot=await getDocs(collection(db,"saved"));
+    snapshot.forEach(docSnap=>{
+        const s=docSnap.data();
+        if(s.userId===user.uid){
+            getDoc(doc(db,"scholarships",s.scholarshipId)).then(schSnap=>{
+                if(!schSnap.exists()) return;
+                const sch=schSnap.data();
+                const div=document.createElement("div"); div.className="scholarship";
+                div.innerHTML=`
+                    <h4>${sch.title}</h4>
+                    <p>${sch.description}</p>
+                    <a href="${sch.link}" target="_blank"><button>Apply</button></a>
+                `;
+                list.appendChild(div);
+            });
+        }
     });
 }
 
-function filterScholarships(){
-    const country = document.getElementById("filterCountry").value.toLowerCase();
-    const field = document.getElementById("filterField").value.toLowerCase();
-    const qualification = document.getElementById("filterQualification").value;
-    const age = document.getElementById("filterAge").value;
-    const grade = document.getElementById("filterGrade").value.toLowerCase();
+/* DELETE SCHOLARSHIP */
+async function deleteScholarship(id){
+    if(!confirm("Are you sure to delete?")) return;
+    await deleteDoc(doc(db,"scholarships",id));
+    alert("Deleted!");
+    loadScholarships();
+}
 
+/* SEARCH & FILTER */
+function searchScholarships(){
+    const keyword=document.getElementById("search").value.toLowerCase();
+    document.querySelectorAll(".scholarship").forEach(card=>{ card.style.display=card.innerText.toLowerCase().includes(keyword)?"inline-block":"none"; });
+}
+function filterScholarships(){
+    const country=document.getElementById("filterCountry").value.toLowerCase();
+    const field=document.getElementById("filterField").value.toLowerCase();
+    const qualification=document.getElementById("filterQualification").value;
+    const age=document.getElementById("filterAge").value;
+    const grade=document.getElementById("filterGrade").value.toLowerCase();
     document.querySelectorAll(".scholarship").forEach(card=>{
-        let text = card.innerText.toLowerCase();
-        let show = true;
+        let text=card.innerText.toLowerCase(); let show=true;
         if(country && !text.includes(country)) show=false;
         if(field && !text.includes(field)) show=false;
         if(qualification && !text.includes(qualification.toLowerCase())) show=false;
         if(age && !text.includes(age)) show=false;
         if(grade && !text.includes(grade)) show=false;
-        card.style.display = show ? "inline-block" : "none";
+        card.style.display=show?"inline-block":"none";
     });
 }
-
 function matchScholarships(){
-    const user = auth.currentUser;
-    if(!user) return alert("Login first");
+    const user=auth.currentUser; if(!user)return alert("Login first");
     getDoc(doc(db,"profiles",user.uid)).then(profileSnap=>{
         if(!profileSnap.exists()) return;
-        const profile = profileSnap.data();
+        const profile=profileSnap.data();
         document.querySelectorAll(".scholarship").forEach(card=>{
-            let show = true;
-            let text = card.innerText.toLowerCase();
+            let show=true; let text=card.innerText.toLowerCase();
             if(profile.country && !text.includes(profile.country.toLowerCase())) show=false;
             if(profile.field && !text.includes(profile.field.toLowerCase())) show=false;
             if(profile.qualification && !text.includes(profile.qualification.toLowerCase())) show=false;
-            card.style.display = show ? "inline-block" : "none";
+            card.style.display=show?"inline-block":"none";
         });
     });
 }
-
 </script>
 
 </body>
