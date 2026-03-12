@@ -112,7 +112,7 @@ button:hover{
   <option>High School</option>
   <option>Certificate</option>
   <option>Diploma</option>
-  <option>Degree / Bachelor</option>
+  <option>Degree </option>
   <option>College</option>
   <option>University</option>
 </select><br>
@@ -128,7 +128,7 @@ button:hover{
   <option>High School</option>
   <option>Certificate</option>
   <option>Diploma</option>
-  <option>Degree / Bachelor</option>
+  <option>Degree</option>
   <option>College</option>
   <option>University</option>
 </select><br>
@@ -148,7 +148,7 @@ button:hover{
   <option>High School</option>
   <option>Certificate</option>
   <option>Diploma</option>
-  <option>Degree / Bachelor</option>
+  <option>Degree</option>
   <option>College</option>
   <option>University</option>
 </select><br>
@@ -242,22 +242,42 @@ document.getElementById("addScholarshipBtn").onclick = async () => {
 async function loadScholarships(){
   const list=document.getElementById("scholarship-list");
   list.innerHTML="";
+  
+  const user = auth.currentUser;
+  if(!user) return;
+
+  // Get user's profile
+  const profileSnap = await getDoc(doc(db,"profiles",user.uid));
+  const profile = profileSnap.exists() ? profileSnap.data() : {};
+
   const querySnapshot = await getDocs(collection(db,"scholarships"));
   querySnapshot.forEach(doc=>{
     const s = doc.data();
-    const div = document.createElement("div");
-    div.className="scholarship";
-    div.innerHTML=`
-      <h4>${s.title}</h4>
-      <p>${s.description}</p>
-      <p><b>Country:</b> ${s.country || "Any"}</p>
-      <p><b>Field:</b> ${s.field || "Any"}</p>
-      <p><b>Level:</b> ${s.level || "Any"}</p>
-      <p><b>Age Range:</b> ${s.minAge || "-"} to ${s.maxAge || "-"}</p>
-      <p><b>Deadline:</b> ${s.deadline || "Not specified"}</p>
-      <a href="${s.link}" target="_blank"><button>Apply</button></a>
-    `;
-    list.appendChild(div);
+    
+    // Matching logic
+    let match = true;
+    if(profile.country && s.country && s.country.toLowerCase() !== profile.country.toLowerCase()) match=false;
+    if(profile.field && s.field && s.field.toLowerCase() !== profile.field.toLowerCase()) match=false;
+    if(profile.level && s.level && s.level !== profile.level) match=false;
+    if(profile.age && s.minAge && profile.age < s.minAge) match=false;
+    if(profile.age && s.maxAge && profile.age > s.maxAge) match=false;
+    
+    if(match){
+      const div = document.createElement("div");
+      div.className="scholarship";
+      div.innerHTML=`
+        <h4>${s.title}</h4>
+        <p>${s.description}</p>
+        <p><b>Country:</b> ${s.country || "Any"}</p>
+        <p><b>Field:</b> ${s.field || "Any"}</p>
+        <p><b>Level:</b> ${s.level || "Any"}</p>
+        <p><b>Age Range:</b> ${s.minAge || "-"} to ${s.maxAge || "-"}</p>
+        <p><b>Deadline:</b> ${s.deadline || "Not specified"}</p>
+        <a href="${s.link}" target="_blank"><button>Apply</button></a>
+      `;
+      list.appendChild(div);
+      <button onclick="loadScholarships()">Match My Profile</button>
+    }
   });
 }
 
