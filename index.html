@@ -15,8 +15,6 @@ body {
     color: #333;
     scroll-behavior: smooth;
 }
-
-/* MAIN CONTAINER */
 .container{
     max-width:1100px;
     margin:auto;
@@ -26,8 +24,6 @@ body {
     border-radius:12px;
     box-shadow:0 10px 40px rgba(0,0,0,0.25);
 }
-
-/* HERO SECTION */
 .hero{
     text-align:center;
     background:rgba(27,31,59,0.85);
@@ -41,8 +37,6 @@ body {
     padding:14px 28px;
     font-size:18px;
 }
-
-/* LOGIN AREA */
 .auth{
     text-align:center;
     margin-bottom:40px;
@@ -51,17 +45,13 @@ body {
     display:block;
     margin:10px auto;
 }
-
-/* INPUTS */
-input{
+input, select{
     padding:12px;
     margin:8px;
     border-radius:8px;
     border:1px solid #ddd;
     width:240px;
 }
-
-/* BUTTONS */
 button{
     padding:12px 20px;
     border:none;
@@ -76,15 +66,11 @@ button:hover{
     transform:scale(1.05);
     background:#574fd6;
 }
-
-/* SCHOLARSHIP GRID */
 .scholarship-list{
     display:flex;
     flex-wrap:wrap;
     justify-content:center;
 }
-
-/* SCHOLARSHIP CARD */
 .scholarship{
     background:white;
     border:1px solid #ddd;
@@ -94,9 +80,7 @@ button:hover{
     width:260px;
     box-shadow:0 5px 15px rgba(0,0,0,0.1);
 }
-
-/* USER AREA */
-#user-section{
+#user-section, #admin-section{
     display:none;
     text-align:center;
 }
@@ -122,14 +106,34 @@ button:hover{
 
 <!-- USER SECTION -->
 <div id="user-section">
+
 <h2 id="welcome"></h2>
 
-<h3>Add Scholarship (Admin)</h3>
-<input type="text" id="title" placeholder="Scholarship Title"><br>
-<input type="text" id="description" placeholder="Description"><br>
+<h3>Your Profile</h3>
 <input type="text" id="country" placeholder="Country"><br>
 <input type="text" id="field" placeholder="Field of Study"><br>
 <select id="level">
+    <option value="">Select Level</option>
+    <option value="Primary School">Primary School</option>
+    <option value="High School">High School</option>
+    <option value="Certificate">Certificate</option>
+    <option value="Diploma">Diploma</option>
+    <option value="College">College</option>
+    <option value="Degree">Degree</option>
+    <option value="University">University</option>
+</select><br>
+<input type="number" id="age" placeholder="Age"><br>
+<input type="text" id="grade" placeholder="Grade (e.g., Grade 6, Grade 12, N/A)"><br>
+<button id="saveProfileBtn">Save Profile</button>
+
+<!-- Admin Section -->
+<div id="admin-section">
+<h3>Add Scholarship (Admin)</h3>
+<input type="text" id="title" placeholder="Scholarship Title"><br>
+<input type="text" id="description" placeholder="Description"><br>
+<input type="text" id="countryScholarship" placeholder="Country"><br>
+<input type="text" id="fieldScholarship" placeholder="Field of Study"><br>
+<select id="levelScholarship">
     <option value="">Select Level</option>
     <option value="Primary School">Primary School</option>
     <option value="High School">High School</option>
@@ -144,21 +148,24 @@ button:hover{
 <input type="date" id="deadline"><br>
 <input type="text" id="link" placeholder="Application Link"><br>
 <button id="addScholarshipBtn">Add Scholarship</button>
+</div>
 
 <h3>Available Scholarships</h3>
 <div id="scholarship-list" class="scholarship-list"></div>
 
 <h3>Saved Scholarships</h3>
 <div id="saved-list" class="scholarship-list"></div>
+
 <br>
 <button id="logoutBtn">Logout</button>
+
 </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, setDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, setDoc, doc, getDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
 apiKey: "AIzaSyDB94Hy6sFUBXE4ObSOQmPW5As4Fbxaoi4",
@@ -168,7 +175,6 @@ storageBucket: "scholarship-platform-ec01f.firebasestorage.app",
 messagingSenderId: "807575045909",
 appId: "1:807575045909:web:9a61a548638423d7988b1c"
 };
-
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -197,18 +203,32 @@ document.getElementById("loginBtn").onclick = async()=>{
 // LOGOUT
 document.getElementById("logoutBtn").onclick = ()=>{ signOut(auth); }
 
-// ADD SCHOLARSHIP
+// SAVE PROFILE
+document.getElementById("saveProfileBtn").onclick = async()=>{
+    const user = auth.currentUser;
+    if(!user){alert("Login first!"); return;}
+    const country = document.getElementById("country").value;
+    const field = document.getElementById("field").value;
+    const level = document.getElementById("level").value;
+    const age = document.getElementById("age").value;
+    const grade = document.getElementById("grade").value;
+    await setDoc(doc(db,"users",user.uid),{country,field,level,age,grade});
+    alert("Profile saved!");
+}
+
+// ADD SCHOLARSHIP (ADMIN)
 document.getElementById("addScholarshipBtn").onclick = async()=>{
+    const user = auth.currentUser;
+    if(!user || user.email!==adminEmail){alert("Only admin can add scholarships!"); return;}
     const title=document.getElementById("title").value;
     const description=document.getElementById("description").value;
-    const country=document.getElementById("country").value;
-    const field=document.getElementById("field").value;
-    const level=document.getElementById("level").value;
+    const country=document.getElementById("countryScholarship").value;
+    const field=document.getElementById("fieldScholarship").value;
+    const level=document.getElementById("levelScholarship").value;
     const minAge=document.getElementById("minAge").value;
     const maxAge=document.getElementById("maxAge").value;
     const deadline=document.getElementById("deadline").value;
     const link=document.getElementById("link").value;
-
     if(!title || !description){alert("Fill required fields"); return;}
     try{
         await addDoc(collection(db,"scholarships"),{title,description,country,field,level,minAge,maxAge,deadline,link});
@@ -220,67 +240,22 @@ document.getElementById("addScholarshipBtn").onclick = async()=>{
 async function loadScholarships(){
     const list=document.getElementById("scholarship-list");
     list.innerHTML="";
-    const querySnapshot = await getDocs(collection(db,"scholarships"));
-    querySnapshot.forEach(docSnap=>{
+    const snapshot = await getDocs(collection(db,"scholarships"));
+    snapshot.forEach(docSnap=>{
         const s=docSnap.data();
         const div=document.createElement("div");
         div.className="scholarship";
-        div.innerHTML = `
+        div.innerHTML=`
             <h4>${s.title}</h4>
             <p>${s.description}</p>
-            <p><b>Country:</b> ${s.country || "Any"}</p>
-            <p><b>Field:</b> ${s.field || "Any"}</p>
-            <p><b>Level:</b> ${s.level || "Any"}</p>
-            <p><b>Age Range:</b> ${s.minAge || "-"} to ${s.maxAge || "-"}</p>
-            <p><b>Deadline:</b> ${s.deadline || "Not specified"}</p>
+            <p><b>Country:</b> ${s.country||"Any"}</p>
+            <p><b>Field:</b> ${s.field||"Any"}</p>
+            <p><b>Level:</b> ${s.level||"Any"}</p>
+            <p><b>Age Range:</b> ${s.minAge||"-"} to ${s.maxAge||"-"}</p>
+            <p><b>Deadline:</b> ${s.deadline||"Not specified"}</p>
             <a href="${s.link}" target="_blank"><button>Apply</button></a>
-            <button onclick="saveScholarship('${docSnap.id}')">Save</button>
         `;
         list.appendChild(div);
-    });
-}
-
-// SAVE SCHOLARSHIP
-async function saveScholarship(scholarshipId){
-    const user = auth.currentUser;
-    if(!user){ alert("Login first!"); return; }
-    try{
-        const docRef = doc(db,"usersSaved",user.uid);
-        const userDoc = await getDoc(docRef);
-        let saved = [];
-        if(userDoc.exists()){ saved = userDoc.data().scholarships || []; }
-        if(!saved.includes(scholarshipId)) saved.push(scholarshipId);
-        await setDoc(docRef,{scholarships:saved});
-        alert("Scholarship saved!");
-        loadSavedScholarships();
-    }catch(e){ alert(e.message);}
-}
-
-// LOAD SAVED SCHOLARSHIPS
-async function loadSavedScholarships(){
-    const list=document.getElementById("saved-list"); list.innerHTML="";
-    const user = auth.currentUser; if(!user) return;
-    const userDoc = await getDoc(doc(db,"usersSaved",user.uid));
-    if(!userDoc.exists()) return;
-    const savedIds = userDoc.data().scholarships || [];
-    const querySnapshot = await getDocs(collection(db,"scholarships"));
-    querySnapshot.forEach(docSnap=>{
-        if(savedIds.includes(docSnap.id)){
-            const s=docSnap.data();
-            const div=document.createElement("div");
-            div.className="scholarship";
-            div.innerHTML = `
-                <h4>${s.title}</h4>
-                <p>${s.description}</p>
-                <p><b>Country:</b> ${s.country || "Any"}</p>
-                <p><b>Field:</b> ${s.field || "Any"}</p>
-                <p><b>Level:</b> ${s.level || "Any"}</p>
-                <p><b>Age Range:</b> ${s.minAge || "-"} to ${s.maxAge || "-"}</p>
-                <p><b>Deadline:</b> ${s.deadline || "Not specified"}</p>
-                <a href="${s.link}" target="_blank"><button>Apply</button></a>
-            `;
-            list.appendChild(div);
-        }
     });
 }
 
@@ -289,10 +264,12 @@ onAuthStateChanged(auth,user=>{
     if(user){
         document.getElementById("user-section").style.display="block";
         document.getElementById("welcome").innerText="Welcome "+user.email;
+        if(user.email===adminEmail){document.getElementById("admin-section").style.display="block";}
+        else{document.getElementById("admin-section").style.display="none";}
         loadScholarships();
-        loadSavedScholarships();
     }else{
         document.getElementById("user-section").style.display="none";
+        document.getElementById("admin-section").style.display="none";
     }
 });
 </script>
