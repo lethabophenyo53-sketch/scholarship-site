@@ -333,3 +333,267 @@ list.appendChild(div);
 
 </body>
 </html>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Scholar Match</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+body{
+font-family:'Montserrat',sans-serif;
+margin:0;
+padding:0;
+background:#f4f6f9;
+}
+
+.container{
+max-width:1100px;
+margin:auto;
+padding:20px;
+}
+
+.hero{
+text-align:center;
+background:#1b1f3b;
+color:white;
+padding:40px;
+border-radius:10px;
+}
+
+button{
+padding:10px 18px;
+border:none;
+border-radius:6px;
+background:#6C63FF;
+color:white;
+cursor:pointer;
+}
+
+button:hover{
+opacity:0.9;
+}
+
+input,select{
+padding:8px;
+margin:5px;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+#user-section{
+display:none;
+}
+
+#admin-section{
+display:none;
+margin-top:20px;
+padding:15px;
+border:2px dashed #6C63FF;
+border-radius:8px;
+}
+
+.scholarship{
+background:white;
+padding:15px;
+margin:10px;
+border-radius:8px;
+box-shadow:0 3px 10px rgba(0,0,0,0.1);
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="hero">
+<h1>Scholar Match</h1>
+<p>Find Scholarships Easily</p>
+</div>
+
+<!-- AUTH -->
+
+<div id="auth-section">
+<h3>Login / Sign Up</h3>
+<input type="email" id="email" placeholder="Email"><br>
+<input type="password" id="password" placeholder="Password"><br>
+<button id="signupBtn">Sign Up</button>
+<button id="loginBtn">Login</button>
+</div>
+
+<!-- USER AREA -->
+
+<div id="user-section">
+
+<h2 id="welcome"></h2>
+
+<h3>Profile</h3>
+
+<input id="country" placeholder="Country"><br>
+
+<select id="level">
+<option value="">Level</option>
+<option>Primary School</option>
+<option>High School</option>
+<option>College</option>
+<option>University</option>
+</select>
+
+<button onclick="saveProfile()">Save Profile</button>
+
+<h3>Scholarships</h3>
+<div id="scholarship-list"></div>
+
+<!-- ADMIN -->
+
+<div id="admin-section">
+
+<h3>Add Scholarship (Admin)</h3>
+
+<input id="title" placeholder="Title"><br>
+<input id="description" placeholder="Description"><br>
+<input id="link" placeholder="Application Link"><br>
+
+<button id="addScholarshipBtn">Add</button>
+
+</div>
+
+<br>
+<button id="logoutBtn">Logout</button>
+
+</div>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+/* YOUR FIREBASE CONFIG */
+
+const firebaseConfig = {
+apiKey: "AIzaSyDB94Hy6sFUBXE4ObSOQmPW5As4Fbxaoi4",
+authDomain: "scholarship-platform-ec01f.firebaseapp.com",
+projectId: "scholarship-platform-ec01f",
+storageBucket: "scholarship-platform-ec01f.firebasestorage.app",
+messagingSenderId: "807575045909",
+appId: "1:807575045909:web:9a61a548638423d7988b1c"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+/* YOUR ADMIN EMAIL */
+
+const adminEmail = "lethabophenyo53@gmail.com";
+
+/* AUTH */
+
+document.getElementById("signupBtn").onclick=()=>{
+createUserWithEmailAndPassword(auth,email.value,password.value);
+};
+
+document.getElementById("loginBtn").onclick=()=>{
+signInWithEmailAndPassword(auth,email.value,password.value);
+};
+
+document.getElementById("logoutBtn").onclick=()=>{
+signOut(auth);
+};
+
+/* AUTH STATE */
+
+onAuthStateChanged(auth,user=>{
+
+if(user){
+
+document.getElementById("auth-section").style.display="none";
+document.getElementById("user-section").style.display="block";
+document.getElementById("welcome").innerText="Welcome "+user.email;
+
+/* SHOW ADMIN ONLY FOR YOU */
+
+if(user.email===adminEmail){
+document.getElementById("admin-section").style.display="block";
+}
+
+loadScholarships();
+
+}else{
+
+document.getElementById("auth-section").style.display="block";
+document.getElementById("user-section").style.display="none";
+document.getElementById("admin-section").style.display="none";
+
+}
+
+});
+
+/* SAVE PROFILE */
+
+window.saveProfile=async()=>{
+const user=auth.currentUser;
+
+await setDoc(doc(db,"profiles",user.uid),{
+country:country.value,
+level:level.value
+});
+
+alert("Profile Saved");
+};
+
+/* ADD SCHOLARSHIP */
+
+document.getElementById("addScholarshipBtn").onclick=async()=>{
+
+await addDoc(collection(db,"scholarships"),{
+title:title.value,
+description:description.value,
+link:link.value
+});
+
+alert("Scholarship Added");
+loadScholarships();
+
+};
+
+/* LOAD SCHOLARSHIPS */
+
+async function loadScholarships(){
+
+const list=document.getElementById("scholarship-list");
+list.innerHTML="";
+
+const snapshot=await getDocs(collection(db,"scholarships"));
+
+snapshot.forEach(doc=>{
+const s=doc.data();
+
+const div=document.createElement("div");
+div.className="scholarship";
+div.innerHTML=`
+<h4>${s.title}</h4>
+<p>${s.description}</p>
+<a href="${s.link}" target="_blank">Apply</a>
+`;
+
+list.appendChild(div);
+
+});
+
+}
+
+</script>
+
+</body>
+</html>
