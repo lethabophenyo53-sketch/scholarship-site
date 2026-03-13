@@ -8,7 +8,7 @@
 
 <style>
 
-/* ---------- General Styles ---------- */
+/* GENERAL */
 
 body{
 font-family:'Montserrat',sans-serif;
@@ -17,10 +17,7 @@ padding:0;
 background:url('https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1600&q=80') no-repeat center center fixed;
 background-size:cover;
 color:#333;
-scroll-behavior:smooth;
 }
-
-/* MAIN CONTAINER */
 
 .container{
 max-width:1100px;
@@ -43,8 +40,7 @@ border-radius:10px;
 margin-bottom:40px;
 }
 
-.hero h1{font-size:50px;}
-
+.hero h1{font-size:48px;}
 .hero p{font-size:20px;}
 
 .hero button{
@@ -57,10 +53,7 @@ background:linear-gradient(135deg,#6C63FF,#4CAF50);
 color:white;
 cursor:pointer;
 font-weight:700;
-box-shadow:0px 6px 20px rgba(0,0,0,0.4);
 }
-
-.hero button:hover{transform:scale(1.05);}
 
 /* AUTH */
 
@@ -85,12 +78,24 @@ border-radius:8px;
 background:#6C63FF;
 color:white;
 cursor:pointer;
-font-weight:600;
 }
 
 .auth button:hover{
 background:#574fd6;
-transform:scale(1.05);
+}
+
+/* USER AREA */
+
+#user-section{
+display:none;
+text-align:center;
+}
+
+input,select{
+margin:5px;
+padding:10px;
+border-radius:6px;
+border:1px solid #ccc;
 }
 
 /* SCHOLARSHIPS */
@@ -107,46 +112,8 @@ border:1px solid #ddd;
 padding:15px;
 margin:10px;
 border-radius:10px;
-width:280px;
+width:260px;
 box-shadow:0 5px 15px rgba(0,0,0,0.1);
-}
-
-.scholarship:hover{
-transform:translateY(-7px);
-box-shadow:0 10px 25px rgba(0,0,0,0.2);
-}
-
-/* USER */
-
-#user-section{
-display:none;
-text-align:center;
-}
-
-input,select{
-margin:5px;
-padding:10px;
-border-radius:6px;
-border:1px solid #ccc;
-}
-
-button{
-font-size:15px;
-}
-
-/* MOBILE */
-
-@media(max-width:768px){
-
-.scholarship{
-width:90%;
-margin:10px auto;
-}
-
-input{
-width:90%;
-}
-
 }
 
 </style>
@@ -162,8 +129,8 @@ width:90%;
 
 <p>Find scholarships for Primary, High School, College & University students</p>
 
-<button onclick="document.getElementById('auth-section').scrollIntoView({behavior:'smooth'});">
-Get Started Now
+<button onclick="document.getElementById('auth-section').scrollIntoView({behavior:'smooth'})">
+Get Started
 </button>
 
 </div>
@@ -184,7 +151,7 @@ Get Started Now
 
 </div>
 
-<!-- USER AREA -->
+<!-- USER SECTION -->
 
 <div id="user-section">
 
@@ -192,7 +159,7 @@ Get Started Now
 
 <h3>Your Profile</h3>
 
-<input type="text" id="country" placeholder="Country"><br>
+<input id="country" placeholder="Country"><br>
 
 <select id="level">
 
@@ -213,9 +180,9 @@ Get Started Now
 
 </select>
 
-<input type="number" id="age" placeholder="Age"><br>
+<input id="age" placeholder="Age"><br>
 
-<input type="text" id="grade" placeholder="Grade"><br>
+<input id="grade" placeholder="Grade"><br>
 
 <button onclick="saveProfile()">Save Profile</button>
 
@@ -225,11 +192,11 @@ Get Started Now
 
 <!-- ADMIN -->
 
-<div id="admin-section" style="display:none;">
+<div id="admin-section" style="display:none">
 
 <h3>Add Scholarship (Admin)</h3>
 
-<input id="title" placeholder="Title"><br>
+<input id="title" placeholder="Scholarship Title"><br>
 
 <input id="description" placeholder="Description"><br>
 
@@ -251,12 +218,6 @@ Get Started Now
 <option>Degree</option>
 
 </select>
-
-<input id="minAge" placeholder="Min Age"><br>
-
-<input id="maxAge" placeholder="Max Age"><br>
-
-<input id="gradeScholarship" placeholder="Grade"><br>
 
 <input id="link" placeholder="Application Link"><br>
 
@@ -280,7 +241,7 @@ import { getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signO
 
 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-import { getFirestore,collection,addDoc,getDocs,doc,setDoc }
+import { getFirestore,collection,addDoc,getDocs,setDoc,doc }
 
 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -317,8 +278,6 @@ const email=document.getElementById("email");
 const password=document.getElementById("password");
 
 document.getElementById("signupBtn").onclick=async()=>{
-
-if(!email.value||!password.value){alert("Enter email & password");return;}
 
 await createUserWithEmailAndPassword(auth,email.value,password.value);
 
@@ -406,12 +365,6 @@ level:levelScholarship.value,
 
 qualification:qualificationScholarship.value,
 
-minAge:minAge.value,
-
-maxAge:maxAge.value,
-
-grade:gradeScholarship.value,
-
 link:link.value
 
 });
@@ -422,7 +375,7 @@ loadScholarships();
 
 }
 
-/* LOAD */
+/* LOAD SCHOLARSHIPS */
 
 async function loadScholarships(){
 
@@ -451,8 +404,6 @@ div.innerHTML=`
 <p><b>Level:</b> ${s.level}</p>
 
 <p><b>Qualification:</b> ${s.qualification}</p>
-
-<p><b>Grade:</b> ${s.grade}</p>
 
 <a href="${s.link}" target="_blank">Apply</a>
 
