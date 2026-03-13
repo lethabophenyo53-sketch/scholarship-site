@@ -11,9 +11,7 @@
 body{
 font-family:'Montserrat',sans-serif;
 margin:0;
-padding:0;
 background:#f4f6f9;
-color:#333;
 }
 
 .container{
@@ -31,13 +29,14 @@ border-radius:10px;
 }
 
 button{
-padding:10px 20px;
+padding:10px 18px;
 border:none;
 border-radius:6px;
 cursor:pointer;
 background:#6C63FF;
 color:white;
 font-weight:600;
+margin:5px;
 }
 
 button:hover{
@@ -89,15 +88,14 @@ border-radius:8px;
 
 <div class="hero">
 <h1>Scholar Match</h1>
-<p>Find scholarships for all education levels</p>
+<p>Find Scholarships for All Students</p>
 </div>
 
 <br>
 
-<!-- AUTH SECTION -->
+<!-- AUTH -->
 
 <div id="auth-section">
-
 <h3>Sign Up / Login</h3>
 
 <input type="email" id="email" placeholder="Email"><br>
@@ -105,10 +103,9 @@ border-radius:8px;
 
 <button id="signupBtn">Sign Up</button>
 <button id="loginBtn">Login</button>
-
 </div>
 
-<!-- USER SECTION -->
+<!-- USER AREA -->
 
 <div id="user-section">
 
@@ -140,13 +137,13 @@ border-radius:8px;
 
 <br><br>
 
-<h3>Premium Features</h3>
+<h3>Premium</h3>
 <button onclick="unlockPremium()">Unlock Premium</button>
 
 <div id="premium-content">
 <h4>Premium Scholarships</h4>
 <div class="scholarship">
-Premium Scholarship Example
+Exclusive Scholarship Example
 </div>
 </div>
 
@@ -162,11 +159,13 @@ Premium Scholarship Example
 
 <script type="module">
 
+/* FIREBASE IMPORTS */
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-/* 🔥 FIREBASE CONFIG */
+/* FIREBASE CONFIG */
 
 const firebaseConfig = {
 apiKey: "AIzaSyDB94Hy6sFUBXE4ObSOQmPW5As4Fbxaoi4",
@@ -185,7 +184,7 @@ const db = getFirestore(app);
 
 document.getElementById("signupBtn").onclick = async () => {
 try{
-await createUserWithEmailAndPassword(auth, email.value, password.value);
+await createUserWithEmailAndPassword(auth,email.value,password.value);
 alert("Account Created!");
 }catch(error){
 alert(error.message);
@@ -196,7 +195,7 @@ alert(error.message);
 
 document.getElementById("loginBtn").onclick = async () => {
 try{
-await signInWithEmailAndPassword(auth, email.value, password.value);
+await signInWithEmailAndPassword(auth,email.value,password.value);
 }catch(error){
 alert(error.message);
 }
@@ -210,21 +209,16 @@ signOut(auth);
 
 /* AUTH STATE */
 
-onAuthStateChanged(auth, user => {
+onAuthStateChanged(auth,user=>{
 
 if(user){
-
 document.getElementById("auth-section").style.display="none";
 document.getElementById("user-section").style.display="block";
-document.getElementById("welcome").innerText="Welcome " + user.email;
-
+document.getElementById("welcome").innerText="Welcome "+user.email;
 loadScholarships();
-
 }else{
-
 document.getElementById("auth-section").style.display="block";
 document.getElementById("user-section").style.display="none";
-
 }
 
 });
@@ -234,18 +228,17 @@ document.getElementById("user-section").style.display="none";
 window.saveProfile = async () => {
 
 const user = auth.currentUser;
-
 if(!user){
-alert("You must be logged in.");
+alert("Login first");
 return;
 }
 
 await setDoc(doc(db,"profiles",user.uid),{
-country: document.getElementById("country").value,
-level: document.getElementById("level").value,
-qualification: document.getElementById("qualification").value,
-age: document.getElementById("age").value,
-grade: document.getElementById("grade").value,
+country: country.value,
+level: level.value,
+qualification: qualification.value,
+age: age.value,
+grade: grade.value,
 premium:false
 });
 
@@ -257,7 +250,6 @@ alert("Profile Saved ✅");
 
 window.unlockPremium = () => {
 document.getElementById("premium-content").style.display="block";
-alert("Premium Unlocked (Frontend Only)");
 };
 
 /* LOAD SCHOLARSHIPS */
@@ -267,18 +259,15 @@ async function loadScholarships(){
 const list = document.getElementById("scholarship-list");
 list.innerHTML="";
 
-const querySnapshot = await getDocs(collection(db,"scholarships"));
+const snapshot = await getDocs(collection(db,"scholarships"));
 
-querySnapshot.forEach((docSnap)=>{
+snapshot.forEach(docSnap=>{
 
 const data = docSnap.data();
 
 const div = document.createElement("div");
 div.className="scholarship";
-div.innerHTML=`
-<h4>${data.title}</h4>
-<p>${data.description}</p>
-`;
+div.innerHTML=`<h4>${data.title}</h4><p>${data.description}</p>`;
 
 list.appendChild(div);
 
