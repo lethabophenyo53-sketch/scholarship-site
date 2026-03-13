@@ -20,7 +20,7 @@ background:url('https://images.unsplash.com/photo-1521791136064-7986c2920216?aut
 background-size:cover;
 }
 
-.container{
+.login-box{
 background:rgba(255,255,255,0.95);
 padding:40px;
 border-radius:12px;
@@ -45,7 +45,7 @@ background:#6C63FF;
 color:white;
 cursor:pointer;
 font-weight:600;
-margin:5px;
+margin:6px;
 }
 
 button:hover{
@@ -57,7 +57,7 @@ background:#574fd6;
 
 <body>
 
-<div class="container">
+<div class="login-box">
 
 <h1>Scholar Match</h1>
 
@@ -92,18 +92,30 @@ const password=document.getElementById("password");
 document.getElementById("signupBtn").onclick=async()=>{
 
 try{
+
 await createUserWithEmailAndPassword(auth,email.value,password.value);
-window.location="dashboard.html";
-}catch(e){alert(e.message)}
+window.location.href="dashboard.html";
+
+}catch(error){
+
+alert(error.message);
+
+}
 
 }
 
 document.getElementById("loginBtn").onclick=async()=>{
 
 try{
+
 await signInWithEmailAndPassword(auth,email.value,password.value);
-window.location="dashboard.html";
-}catch(e){alert(e.message)}
+window.location.href="dashboard.html";
+
+}catch(error){
+
+alert(error.message);
+
+}
 
 }
 
