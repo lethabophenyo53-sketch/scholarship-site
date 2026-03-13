@@ -8,12 +8,15 @@
 
 <style>
 
+/* GENERAL */
+
 body{
 font-family:'Montserrat',sans-serif;
 margin:0;
 padding:0;
 background:url('https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1600&q=80') no-repeat center center fixed;
 background-size:cover;
+color:#333;
 }
 
 .container{
@@ -23,49 +26,108 @@ background:rgba(255,255,255,0.95);
 padding:30px;
 margin-top:40px;
 border-radius:12px;
+box-shadow:0 10px 40px rgba(0,0,0,0.25);
 }
+
+/* HERO */
 
 .hero{
 text-align:center;
 background:rgba(27,31,59,0.85);
 color:white;
-padding:50px;
+padding:60px;
 border-radius:10px;
-margin-bottom:30px;
+margin-bottom:40px;
 }
+
+.hero h1{font-size:48px;}
+.hero p{font-size:20px;}
+
+.hero button{
+margin-top:20px;
+padding:14px 28px;
+font-size:18px;
+border-radius:50px;
+border:none;
+background:linear-gradient(135deg,#6C63FF,#4CAF50);
+color:white;
+cursor:pointer;
+font-weight:700;
+}
+
+/* AUTH */
 
 .auth{
 text-align:center;
-margin-bottom:30px;
+margin-bottom:40px;
 }
 
 .auth input{
-padding:10px;
-margin:6px;
+padding:12px;
+margin:8px;
+border-radius:8px;
+border:1px solid #ddd;
 width:250px;
 }
 
-button{
-padding:10px 18px;
-margin:6px;
+.auth button{
+padding:12px 25px;
+margin:8px;
+border:none;
+border-radius:8px;
 background:#6C63FF;
 color:white;
-border:none;
-border-radius:6px;
 cursor:pointer;
 }
+
+.auth button:hover{
+background:#574fd6;
+}
+
+/* USER AREA */
 
 #user-section{
 display:none;
 text-align:center;
 }
 
+input,select{
+margin:5px;
+padding:10px;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+/* PREMIUM SECTION */
+
+#premium-section{
+margin-top:30px;
+padding:20px;
+border:2px dashed #6C63FF;
+border-radius:10px;
+}
+
+#premium-content{
+display:none;
+margin-top:15px;
+}
+
+/* SCHOLARSHIPS */
+
+.scholarship-list{
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+}
+
 .scholarship{
 background:white;
+border:1px solid #ddd;
 padding:15px;
 margin:10px;
-border-radius:8px;
-border:1px solid #ddd;
+border-radius:10px;
+width:260px;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
 }
 
 </style>
@@ -76,8 +138,15 @@ border:1px solid #ddd;
 <div class="container">
 
 <div class="hero">
+
 <h1>Scholar Match</h1>
-<p>Find Scholarships Easily</p>
+
+<p>Find scholarships for Primary, High School, College & University students</p>
+
+<button onclick="document.getElementById('auth-section').scrollIntoView({behavior:'smooth'})">
+Get Started
+</button>
+
 </div>
 
 <!-- LOGIN -->
@@ -87,34 +156,73 @@ border:1px solid #ddd;
 <h3>Login / Sign Up</h3>
 
 <input type="email" id="email" placeholder="Email"><br>
+
 <input type="password" id="password" placeholder="Password"><br>
 
 <button id="signupBtn">Sign Up</button>
+
 <button id="loginBtn">Login</button>
 
 </div>
 
-<!-- USER AREA -->
+<!-- USER SECTION -->
 
 <div id="user-section">
 
 <h2 id="welcome"></h2>
 
-<h3>Premium Subscription</h3>
+<h3>Your Profile</h3>
 
-<button onclick="subscribe('monthly')">
-Monthly Plan
-</button>
+<input id="country" placeholder="Country"><br>
 
-<button onclick="subscribe('yearly')">
-Yearly Plan
-</button>
+<select id="level">
 
-<p id="premiumStatus"></p>
+<option value="">Level of School</option>
+<option>Primary School</option>
+<option>High School</option>
+<option>College</option>
+<option>University</option>
 
-<h3>Scholarships</h3>
+</select>
 
-<div id="scholarship-list"></div>
+<select id="qualification">
+
+<option value="">Qualification</option>
+<option>Certificate</option>
+<option>Diploma</option>
+<option>Degree</option>
+
+</select>
+
+<input id="age" placeholder="Age"><br>
+
+<input id="grade" placeholder="Grade"><br>
+
+<button onclick="saveProfile()">Save Profile</button>
+
+<!-- PREMIUM ADDED HERE -->
+
+<div id="premium-section">
+
+<h3>Premium Access</h3>
+
+<button onclick="unlockPremium()">Unlock Premium Features</button>
+
+<div id="premium-content">
+
+<h4>🔥 Premium Scholarships</h4>
+
+<div class="scholarship">
+Premium Only Scholarship Example
+</div>
+
+</div>
+
+</div>
+
+<h3>Available Scholarships</h3>
+
+<div id="scholarship-list" class="scholarship-list"></div>
 
 <button id="logoutBtn">Logout</button>
 
@@ -125,98 +233,110 @@ Yearly Plan
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore,collection,getDocs,setDoc,doc,getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+import { getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged }
+
+from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+import { getFirestore,collection,addDoc,getDocs,setDoc,doc }
+
+from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+/* FIREBASE */
 
 const firebaseConfig = {
+
 apiKey: "YOUR_API_KEY",
 authDomain: "YOUR_AUTH_DOMAIN",
-projectId: "YOUR_PROJECT_ID"
+projectId: "YOUR_PROJECT_ID",
+storageBucket: "YOUR_STORAGE_BUCKET",
+messagingSenderId: "YOUR_SENDER_ID",
+appId: "YOUR_APP_ID"
+
 };
 
 const app = initializeApp(firebaseConfig);
+
 const auth = getAuth(app);
+
 const db = getFirestore(app);
 
-document.getElementById("signupBtn").onclick = async ()=>{
+/* AUTH */
+
+const email=document.getElementById("email");
+
+const password=document.getElementById("password");
+
+document.getElementById("signupBtn").onclick=async()=>{
+
 await createUserWithEmailAndPassword(auth,email.value,password.value);
+
 };
 
-document.getElementById("loginBtn").onclick = async ()=>{
+document.getElementById("loginBtn").onclick=async()=>{
+
 await signInWithEmailAndPassword(auth,email.value,password.value);
+
 };
 
-document.getElementById("logoutBtn").onclick = ()=>{
+document.getElementById("logoutBtn").onclick=()=>{
+
 signOut(auth);
+
 };
 
-onAuthStateChanged(auth,async user=>{
+/* AUTH STATE */
+
+onAuthStateChanged(auth,user=>{
 
 if(user){
 
 document.getElementById("auth-section").style.display="none";
-document.getElementById("user-section").style.display="block";
-document.getElementById("welcome").innerText="Welcome "+user.email;
 
-checkPremium(user);
+document.getElementById("user-section").style.display="block";
+
+document.getElementById("welcome").innerText="Welcome "+user.email;
 
 loadScholarships();
 
 }else{
 
 document.getElementById("auth-section").style.display="block";
+
 document.getElementById("user-section").style.display="none";
 
 }
 
 });
 
-async function checkPremium(user){
+/* PREMIUM FUNCTION */
 
-const profile = await getDoc(doc(db,"profiles",user.uid));
+window.unlockPremium=function(){
 
-if(profile.exists() && profile.data().premium){
+document.getElementById("premium-content").style.display="block";
 
-document.getElementById("premiumStatus").innerText="✨ Premium Active";
+alert("Premium unlocked (frontend only for now)");
 
-}else{
+};
 
-document.getElementById("premiumStatus").innerText="Standard Account";
+/* SAVE PROFILE */
 
-}
+window.saveProfile=async()=>{
 
-}
+const user=auth.currentUser;
 
-async function loadScholarships(){
+await setDoc(doc(db,"profiles",user.uid),{
 
-const list=document.getElementById("scholarship-list");
-list.innerHTML="";
-
-const snapshot=await getDocs(collection(db,"scholarships"));
-
-snapshot.forEach(doc=>{
-
-const s=doc.data();
-
-const div=document.createElement("div");
-div.className="scholarship";
-
-div.innerHTML=`
-<h4>${s.title}</h4>
-<p>${s.description}</p>
-`;
-
-list.appendChild(div);
+country:country.value,
+level:level.value,
+qualification:qualification.value,
+age:age.value,
+grade:grade.value,
+premium:false
 
 });
 
-}
-
-/* PREMIUM BUTTON (NEXT STEP WILL CONNECT PAYFAST) */
-
-window.subscribe = (type)=>{
-
-alert("Payment integration will be connected next step with PayFast.");
+alert("Profile saved");
 
 };
 
