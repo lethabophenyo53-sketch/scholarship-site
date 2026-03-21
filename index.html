@@ -61,7 +61,7 @@ border-radius:8px;
 box-shadow:0 3px 10px rgba(0,0,0,0.1);
 }
 
-#premium-section{
+#premium-box{
 margin-top:20px;
 padding:15px;
 border:2px dashed green;
@@ -95,6 +95,7 @@ border:2px dashed green;
 <h2 id="welcome"></h2>
 
 <h3>Profile</h3>
+
 <input id="country" placeholder="Country"><br>
 
 <select id="level">
@@ -107,29 +108,15 @@ border:2px dashed green;
 
 <button onclick="saveProfile()">Save Profile</button>
 
-<!-- 💎 PREMIUM PAYMENT -->
+<!-- 💎 PREMIUM -->
 
-<div id="premium-section">
+<div id="premium-box">
 
 <h3>Premium Access</h3>
-<p>Unlock exclusive scholarships</p>
 
-<form action="https://sandbox.payfast.co.za/eng/process" method="post">
+<p id="premium-status">Free User</p>
 
-<input type="hidden" name="merchant_id" value="YOUR_MERCHANT_ID">
-<input type="hidden" name="merchant_key" value="YOUR_MERCHANT_KEY">
-
-<input type="hidden" name="amount" value="49.00">
-<input type="hidden" name="item_name" value="Scholar Match Premium">
-
-<input type="hidden" name="return_url" value="http://localhost/success.html">
-<input type="hidden" name="cancel_url" value="http://localhost/cancel.html">
-
-<button type="submit" style="background:green;">
-Pay R49 for Premium
-</button>
-
-</form>
+<button onclick="activatePremium()">Activate Premium (Test)</button>
 
 </div>
 
@@ -146,6 +133,13 @@ Pay R49 for Premium
 <input id="description" placeholder="Description"><br>
 <input id="link" placeholder="Application Link"><br>
 
+<select id="levelScholarship">
+<option>Primary School</option>
+<option>High School</option>
+<option>College</option>
+<option>University</option>
+</select>
+
 <button id="addScholarshipBtn">Add</button>
 
 </div>
@@ -161,7 +155,9 @@ Pay R49 for Premium
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, setDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+/* FIREBASE */
 
 const firebaseConfig = {
 apiKey: "AIzaSyDB94Hy6sFUBXE4ObSOQmPW5As4Fbxaoi4",
@@ -186,7 +182,7 @@ logoutBtn.onclick=()=>signOut(auth);
 
 /* AUTH STATE */
 
-onAuthStateChanged(auth,user=>{
+onAuthStateChanged(auth, async user=>{
 
 if(user){
 
@@ -194,10 +190,28 @@ auth-section.style.display="none";
 user-section.style.display="block";
 welcome.innerText="Welcome "+user.email;
 
+/* ADMIN */
 if(user.email===adminEmail){
 admin-section.style.display="block";
 }
 
+/* LOAD PROFILE */
+const profileRef = doc(db,"profiles",user.uid);
+const profileSnap = await getDoc(profileRef);
+
+let isPremium = false;
+
+if(profileSnap.exists()){
+isPremium = profileSnap.data().premium || false;
+}
+
+/* STORE GLOBAL */
+window.isPremiumUser = isPremium;
+
+/* SHOW STATUS */
+document.getElementById("premium-status").innerText = isPremium ? "💎 Premium User" : "Free User";
+
+/* LOAD DATA */
 loadScholarships();
 
 }else{
@@ -217,10 +231,24 @@ const user=auth.currentUser;
 
 await setDoc(doc(db,"profiles",user.uid),{
 country:country.value,
-level:level.value
+level:level.value,
+premium:false
 });
 
-alert("Saved");
+alert("Profile Saved");
+};
+
+/* TEST PREMIUM */
+
+window.activatePremium=async()=>{
+const user=auth.currentUser;
+
+await setDoc(doc(db,"profiles",user.uid),{
+premium:true
+},{merge:true});
+
+alert("Premium Activated 💎");
+location.reload();
 };
 
 /* ADD SCHOLARSHIP */
@@ -229,13 +257,14 @@ addScholarshipBtn.onclick=async()=>{
 await addDoc(collection(db,"scholarships"),{
 title:title.value,
 description:description.value,
-link:link.value
+link:link.value,
+level:levelScholarship.value
 });
 alert("Added");
 loadScholarships();
 };
 
-/* LOAD */
+/* LOAD SCHOLARSHIPS */
 
 async function loadScholarships(){
 
@@ -245,6 +274,11 @@ const snapshot=await getDocs(collection(db,"scholarships"));
 
 snapshot.forEach(doc=>{
 const s=doc.data();
+
+/* PREMIUM LOCK */
+if(s.level==="University" && !window.isPremiumUser){
+return;
+}
 
 scholarship-list.innerHTML+=`
 <div class="scholarship">
