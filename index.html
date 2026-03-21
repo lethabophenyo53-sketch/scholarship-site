@@ -79,7 +79,6 @@ border:2px dashed green;
 </div>
 
 <!-- AUTH -->
-
 <div id="auth-section">
 <h3>Login / Sign Up</h3>
 <input type="email" id="email" placeholder="Email"><br>
@@ -89,13 +88,11 @@ border:2px dashed green;
 </div>
 
 <!-- USER -->
-
 <div id="user-section">
 
 <h2 id="welcome"></h2>
 
 <h3>Profile</h3>
-
 <input id="country" placeholder="Country"><br>
 
 <select id="level">
@@ -108,27 +105,19 @@ border:2px dashed green;
 
 <button onclick="saveProfile()">Save Profile</button>
 
-<!-- 💎 PREMIUM -->
-
+<!-- PREMIUM -->
 <div id="premium-box">
-
 <h3>Premium Access</h3>
-
 <p id="premium-status">Free User</p>
-
 <button onclick="activatePremium()">Activate Premium (Test)</button>
-
 </div>
 
 <h3>Scholarships</h3>
 <div id="scholarship-list"></div>
 
 <!-- ADMIN -->
-
 <div id="admin-section">
-
 <h3>Add Scholarship (Admin)</h3>
-
 <input id="title" placeholder="Title"><br>
 <input id="description" placeholder="Description"><br>
 <input id="link" placeholder="Application Link"><br>
@@ -141,7 +130,6 @@ border:2px dashed green;
 </select>
 
 <button id="addScholarshipBtn">Add</button>
-
 </div>
 
 <br>
@@ -157,13 +145,12 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDocs, setDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-/* FIREBASE */
-
+/* FIREBASE CONFIG */
 const firebaseConfig = {
 apiKey: "AIzaSyDB94Hy6sFUBXE4ObSOQmPW5As4Fbxaoi4",
 authDomain: "scholarship-platform-ec01f.firebaseapp.com",
 projectId: "scholarship-platform-ec01f",
-storageBucket: "scholarship-platform-ec01f.firebasestorage.app",
+storageBucket: "scholarship-platform-ec01f.appspot.com",
 messagingSenderId: "807575045909",
 appId: "1:807575045909:web:9a61a548638423d7988b1c"
 };
@@ -172,27 +159,47 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const adminEmail="lethabophenyo53@gmail.com";
+const adminEmail = "lethabophenyo53@gmail.com";
+
+/* ELEMENTS */
+const authSection = document.getElementById("auth-section");
+const userSection = document.getElementById("user-section");
+const adminSection = document.getElementById("admin-section");
+const welcome = document.getElementById("welcome");
+const scholarshipList = document.getElementById("scholarship-list");
+const premiumStatus = document.getElementById("premium-status");
 
 /* AUTH */
+document.getElementById("signupBtn").onclick = async () => {
+try{
+await createUserWithEmailAndPassword(auth,email.value,password.value);
+}catch(e){alert(e.message);}
+};
 
-signupBtn.onclick=()=>createUserWithEmailAndPassword(auth,email.value,password.value);
-loginBtn.onclick=()=>signInWithEmailAndPassword(auth,email.value,password.value);
-logoutBtn.onclick=()=>signOut(auth);
+document.getElementById("loginBtn").onclick = async () => {
+try{
+await signInWithEmailAndPassword(auth,email.value,password.value);
+}catch(e){alert(e.message);}
+};
+
+document.getElementById("logoutBtn").onclick = () => {
+signOut(auth);
+};
 
 /* AUTH STATE */
-
-onAuthStateChanged(auth, async user=>{
+onAuthStateChanged(auth, async (user) => {
 
 if(user){
 
-auth-section.style.display="none";
-user-section.style.display="block";
-welcome.innerText="Welcome "+user.email;
+authSection.style.display="none";
+userSection.style.display="block";
+welcome.innerText="Welcome " + user.email;
 
 /* ADMIN */
-if(user.email===adminEmail){
-admin-section.style.display="block";
+if(user.email === adminEmail){
+adminSection.style.display="block";
+}else{
+adminSection.style.display="none";
 }
 
 /* LOAD PROFILE */
@@ -205,33 +212,30 @@ if(profileSnap.exists()){
 isPremium = profileSnap.data().premium || false;
 }
 
-/* STORE GLOBAL */
 window.isPremiumUser = isPremium;
 
-/* SHOW STATUS */
-document.getElementById("premium-status").innerText = isPremium ? "💎 Premium User" : "Free User";
+premiumStatus.innerText = isPremium ? "💎 Premium User" : "Free User";
 
-/* LOAD DATA */
+/* LOAD SCHOLARSHIPS */
 loadScholarships();
 
 }else{
 
-auth-section.style.display="block";
-user-section.style.display="none";
-admin-section.style.display="none";
+authSection.style.display="block";
+userSection.style.display="none";
+adminSection.style.display="none";
 
 }
 
 });
 
 /* SAVE PROFILE */
-
-window.saveProfile=async()=>{
-const user=auth.currentUser;
+window.saveProfile = async () => {
+const user = auth.currentUser;
 
 await setDoc(doc(db,"profiles",user.uid),{
-country:country.value,
-level:level.value,
+country:document.getElementById("country").value,
+level:document.getElementById("level").value,
 premium:false
 });
 
@@ -239,9 +243,8 @@ alert("Profile Saved");
 };
 
 /* TEST PREMIUM */
-
-window.activatePremium=async()=>{
-const user=auth.currentUser;
+window.activatePremium = async () => {
+const user = auth.currentUser;
 
 await setDoc(doc(db,"profiles",user.uid),{
 premium:true
@@ -252,41 +255,44 @@ location.reload();
 };
 
 /* ADD SCHOLARSHIP */
-
-addScholarshipBtn.onclick=async()=>{
+document.getElementById("addScholarshipBtn").onclick = async () => {
 await addDoc(collection(db,"scholarships"),{
-title:title.value,
-description:description.value,
-link:link.value,
-level:levelScholarship.value
+title:document.getElementById("title").value,
+description:document.getElementById("description").value,
+link:document.getElementById("link").value,
+level:document.getElementById("levelScholarship").value
 });
-alert("Added");
+
+alert("Scholarship Added");
 loadScholarships();
 };
 
 /* LOAD SCHOLARSHIPS */
-
 async function loadScholarships(){
 
-scholarship-list.innerHTML="";
+scholarshipList.innerHTML="";
 
-const snapshot=await getDocs(collection(db,"scholarships"));
+const snapshot = await getDocs(collection(db,"scholarships"));
 
-snapshot.forEach(doc=>{
-const s=doc.data();
+snapshot.forEach(docSnap=>{
+const s = docSnap.data();
 
-/* PREMIUM LOCK */
+/* LOCK PREMIUM */
 if(s.level==="University" && !window.isPremiumUser){
 return;
 }
 
-scholarship-list.innerHTML+=`
-<div class="scholarship">
+const div=document.createElement("div");
+div.className="scholarship";
+
+div.innerHTML=`
 <h4>${s.title}</h4>
 <p>${s.description}</p>
 <a href="${s.link}" target="_blank">Apply</a>
-</div>
 `;
+
+scholarshipList.appendChild(div);
+
 });
 
 }
