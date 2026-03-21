@@ -10,7 +10,6 @@
 body{
 font-family:'Montserrat',sans-serif;
 margin:0;
-padding:0;
 background:#f4f6f9;
 }
 
@@ -22,10 +21,10 @@ padding:20px;
 
 .hero{
 text-align:center;
-background:#1b1f3b;
+background:linear-gradient(135deg,#1b1f3b,#6C63FF);
 color:white;
-padding:40px;
-border-radius:10px;
+padding:50px;
+border-radius:12px;
 }
 
 button{
@@ -35,36 +34,48 @@ border-radius:6px;
 background:#6C63FF;
 color:white;
 cursor:pointer;
+transition:0.3s;
+}
+
+button:hover{
+opacity:0.8;
 }
 
 input,select{
-padding:8px;
-margin:5px;
+padding:10px;
+margin:6px;
 border-radius:6px;
 border:1px solid #ccc;
+width:250px;
 }
 
-#user-section{display:none;}
-
-#admin-section{
-display:none;
-margin-top:20px;
-padding:15px;
-border:2px dashed #6C63FF;
-}
-
-.scholarship{
+.card{
 background:white;
 padding:15px;
 margin:10px;
-border-radius:8px;
-box-shadow:0 3px 10px rgba(0,0,0,0.1);
+border-radius:10px;
+box-shadow:0 4px 15px rgba(0,0,0,0.1);
+}
+
+#user-section, #admin-section{
+display:none;
 }
 
 #premium-box{
-margin-top:20px;
-padding:15px;
 border:2px dashed green;
+padding:15px;
+margin-top:20px;
+border-radius:8px;
+}
+
+.locked{
+opacity:0.5;
+}
+
+.loading{
+text-align:center;
+margin:20px;
+font-weight:bold;
 }
 </style>
 </head>
@@ -74,7 +85,7 @@ border:2px dashed green;
 <div class="container">
 
 <div class="hero">
-<h1>Scholar Match</h1>
+<h1>🎓 Scholar Match</h1>
 <p>Find Scholarships Easily</p>
 </div>
 
@@ -92,18 +103,20 @@ border:2px dashed green;
 
 <h2 id="welcome"></h2>
 
-<h3>Profile</h3>
+<div class="card">
+<h3>Your Profile</h3>
 <input id="country" placeholder="Country"><br>
 
 <select id="level">
-<option value="">Level</option>
+<option value="">Select Level</option>
 <option>Primary School</option>
 <option>High School</option>
 <option>College</option>
 <option>University</option>
-</select>
+</select><br>
 
 <button onclick="saveProfile()">Save Profile</button>
+</div>
 
 <!-- PREMIUM -->
 <div id="premium-box">
@@ -116,7 +129,7 @@ border:2px dashed green;
 <div id="scholarship-list"></div>
 
 <!-- ADMIN -->
-<div id="admin-section">
+<div id="admin-section" class="card">
 <h3>Add Scholarship (Admin)</h3>
 <input id="title" placeholder="Title"><br>
 <input id="description" placeholder="Description"><br>
@@ -127,9 +140,9 @@ border:2px dashed green;
 <option>High School</option>
 <option>College</option>
 <option>University</option>
-</select>
+</select><br>
 
-<button id="addScholarshipBtn">Add</button>
+<button id="addScholarshipBtn">Add Scholarship</button>
 </div>
 
 <br>
@@ -145,14 +158,11 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDocs, setDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-/* FIREBASE CONFIG */
+/* FIREBASE */
 const firebaseConfig = {
-apiKey: "AIzaSyDB94Hy6sFUBXE4ObSOQmPW5As4Fbxaoi4",
-authDomain: "scholarship-platform-ec01f.firebaseapp.com",
-projectId: "scholarship-platform-ec01f",
-storageBucket: "scholarship-platform-ec01f.appspot.com",
-messagingSenderId: "807575045909",
-appId: "1:807575045909:web:9a61a548638423d7988b1c"
+apiKey: "YOUR_API_KEY",
+authDomain: "YOUR_DOMAIN",
+projectId: "YOUR_PROJECT_ID",
 };
 
 const app = initializeApp(firebaseConfig);
@@ -162,6 +172,9 @@ const db = getFirestore(app);
 const adminEmail = "lethabophenyo53@gmail.com";
 
 /* ELEMENTS */
+const email = document.getElementById("email");
+const password = document.getElementById("password");
+
 const authSection = document.getElementById("auth-section");
 const userSection = document.getElementById("user-section");
 const adminSection = document.getElementById("admin-section");
@@ -170,61 +183,58 @@ const scholarshipList = document.getElementById("scholarship-list");
 const premiumStatus = document.getElementById("premium-status");
 
 /* AUTH */
-document.getElementById("signupBtn").onclick = async () => {
+signupBtn.onclick = async () => {
+if(!email.value || !password.value){
+alert("Fill in all fields");
+return;
+}
+
 try{
 await createUserWithEmailAndPassword(auth,email.value,password.value);
-}catch(e){alert(e.message);}
+}catch(e){
+alert(e.message);
+}
 };
 
-document.getElementById("loginBtn").onclick = async () => {
+loginBtn.onclick = async () => {
+if(!email.value || !password.value){
+alert("Fill in all fields");
+return;
+}
+
 try{
 await signInWithEmailAndPassword(auth,email.value,password.value);
-}catch(e){alert(e.message);}
+}catch(e){
+alert(e.message);
+}
 };
 
-document.getElementById("logoutBtn").onclick = () => {
-signOut(auth);
-};
+logoutBtn.onclick = () => signOut(auth);
 
 /* AUTH STATE */
 onAuthStateChanged(auth, async (user) => {
 
 if(user){
-
 authSection.style.display="none";
 userSection.style.display="block";
 welcome.innerText="Welcome " + user.email;
 
-/* ADMIN */
-if(user.email === adminEmail){
-adminSection.style.display="block";
-}else{
-adminSection.style.display="none";
-}
+adminSection.style.display = user.email === adminEmail ? "block" : "none";
 
 /* LOAD PROFILE */
 const profileRef = doc(db,"profiles",user.uid);
-const profileSnap = await getDoc(profileRef);
+const snap = await getDoc(profileRef);
 
-let isPremium = false;
+window.isPremiumUser = snap.exists() ? snap.data().premium : false;
 
-if(profileSnap.exists()){
-isPremium = profileSnap.data().premium || false;
-}
+premiumStatus.innerText = window.isPremiumUser ? "💎 Premium User" : "Free User";
 
-window.isPremiumUser = isPremium;
-
-premiumStatus.innerText = isPremium ? "💎 Premium User" : "Free User";
-
-/* LOAD SCHOLARSHIPS */
 loadScholarships();
 
 }else{
-
 authSection.style.display="block";
 userSection.style.display="none";
 adminSection.style.display="none";
-
 }
 
 });
@@ -233,16 +243,21 @@ adminSection.style.display="none";
 window.saveProfile = async () => {
 const user = auth.currentUser;
 
-await setDoc(doc(db,"profiles",user.uid),{
-country:document.getElementById("country").value,
-level:document.getElementById("level").value,
-premium:false
+const ref = doc(db,"profiles",user.uid);
+const existing = await getDoc(ref);
+
+let premium = existing.exists() ? existing.data().premium : false;
+
+await setDoc(ref,{
+country:country.value,
+level:level.value,
+premium:premium
 });
 
-alert("Profile Saved");
+alert("Profile saved ✅");
 };
 
-/* TEST PREMIUM */
+/* PREMIUM */
 window.activatePremium = async () => {
 const user = auth.currentUser;
 
@@ -250,49 +265,58 @@ await setDoc(doc(db,"profiles",user.uid),{
 premium:true
 },{merge:true});
 
-alert("Premium Activated 💎");
-location.reload();
+window.isPremiumUser = true;
+premiumStatus.innerText = "💎 Premium User";
+
+loadScholarships();
 };
 
 /* ADD SCHOLARSHIP */
-document.getElementById("addScholarshipBtn").onclick = async () => {
+addScholarshipBtn.onclick = async () => {
+
+if(!title.value || !description.value || !link.value){
+alert("Fill all fields");
+return;
+}
+
 await addDoc(collection(db,"scholarships"),{
-title:document.getElementById("title").value,
-description:document.getElementById("description").value,
-link:document.getElementById("link").value,
-level:document.getElementById("levelScholarship").value
+title:title.value,
+description:description.value,
+link:link.value,
+level:levelScholarship.value
 });
 
-alert("Scholarship Added");
+alert("Added ✅");
 loadScholarships();
 };
 
 /* LOAD SCHOLARSHIPS */
 async function loadScholarships(){
 
-scholarshipList.innerHTML="";
+scholarshipList.innerHTML = "<div class='loading'>Loading...</div>";
 
 const snapshot = await getDocs(collection(db,"scholarships"));
+
+scholarshipList.innerHTML = "";
 
 snapshot.forEach(docSnap=>{
 const s = docSnap.data();
 
-/* LOCK PREMIUM */
-if(s.level==="University" && !window.isPremiumUser){
-return;
-}
+const locked = (s.level==="University" && !window.isPremiumUser);
 
 const div=document.createElement("div");
-div.className="scholarship";
+div.className="card " + (locked ? "locked" : "");
 
 div.innerHTML=`
 <h4>${s.title}</h4>
 <p>${s.description}</p>
-<a href="${s.link}" target="_blank">Apply</a>
+${locked 
+? "<p>🔒 Premium Only</p>" 
+: `<a href="${s.link}" target="_blank">Apply</a>`
+}
 `;
 
 scholarshipList.appendChild(div);
-
 });
 
 }
