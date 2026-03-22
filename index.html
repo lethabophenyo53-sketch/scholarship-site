@@ -108,9 +108,25 @@ opacity:0.5;
 <div class="card">
 <h3>💎 Premium</h3>
 <p id="premiumStatus">Free User</p>
-<button onclick="activatePremium()">Activate Premium (Test)</button>
-</div>
 
+<form id="payfastForm" action="https://sandbox.payfast.co.za/eng/process" method="post">
+
+<input type="hidden" name="merchant_id" value="10000100">
+<input type="hidden" name="merchant_key" value="46f0cd694581a">
+
+<input type="hidden" name="amount" value="50.00">
+<input type="hidden" name="item_name" value="Scholar Match Premium">
+
+<input type="hidden" name="return_url" value="http://localhost:5500/success.html">
+<input type="hidden" name="cancel_url" value="http://localhost:5500/cancel.html">
+
+<input type="hidden" name="email_address" id="payfast-email">
+
+<button type="submit">Upgrade to Premium 💳</button>
+
+</form>
+
+</div>
 <h3>Scholarships</h3>
 <div id="list" class="grid"></div>
 
@@ -178,6 +194,7 @@ authSection.style.display="none";
 userSection.style.display="block";
 
 welcome.innerText="Welcome " + user.email;
+document.getElementById("payfast-email").value = user.email;
 
 /* ADMIN */
 adminSection.style.display = user.email === adminEmail ? "block" : "none";
