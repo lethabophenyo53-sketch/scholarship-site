@@ -1,39 +1,15 @@
-<script type="module">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Payment Success</title>
+</head>
+<body>
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  <h2>✅ Payment received</h2>
+  <p>Your account will be upgraded shortly.</p>
 
-const firebaseConfig = {
-apiKey: "AIzaSyDB94Hy6sFUBXE4ObSOQmPW5As4Fbxaoi4",
-authDomain: "scholarship-platform-ec01f.firebaseapp.com",
-projectId: "scholarship-platform-ec01f"
-};
+  <a href="index.html">Go back</a>
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-/* 🔐 CHECK IF USER CAME FROM PAYMENT */
-const urlParams = new URLSearchParams(window.location.search);
-const payment_id = urlParams.get("pf_payment_id");
-
-if(!payment_id){
-document.body.innerHTML = "<h2>❌ Invalid access</h2>";
-throw new Error("No payment detected");
-}
-
-/* CONTINUE ONLY IF VALID */
-auth.onAuthStateChanged(async (user)=>{
-if(user){
-
-await setDoc(doc(db,"profiles",user.uid),{
-premium:true
-},{merge:true});
-
-document.body.innerHTML = "<h2>💎 Premium Activated!</h2><a href='index.html'>Go back</a>";
-
-}
-});
-
-</script>
+</body>
+</html>
