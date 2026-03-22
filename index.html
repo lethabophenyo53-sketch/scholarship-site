@@ -4,15 +4,13 @@
 <meta charset="UTF-8">
 <title>Scholar Match</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
-
 body{
 font-family:'Poppins',sans-serif;
+margin:0;
 background:#f5f7fb;
-color:#333;
 }
 
 .container{
@@ -21,36 +19,20 @@ margin:auto;
 padding:20px;
 }
 
-/* HERO */
 .hero{
 background:linear-gradient(135deg,#4f46e5,#7c3aed);
 color:white;
-padding:60px 20px;
+padding:50px;
 border-radius:15px;
-text-align:center;
-margin-bottom:30px;
-}
-
-.hero h1{
-font-size:40px;
-}
-
-.hero p{
-opacity:0.9;
-}
-
-/* AUTH */
-.auth-box{
 text-align:center;
 margin-bottom:20px;
 }
 
-input, select{
+input,select{
 padding:10px;
-margin:8px;
+margin:5px;
 border-radius:8px;
 border:1px solid #ddd;
-width:250px;
 }
 
 button{
@@ -60,59 +42,28 @@ border-radius:8px;
 background:#4f46e5;
 color:white;
 cursor:pointer;
-transition:0.3s;
 }
 
-button:hover{
-transform:scale(1.05);
-}
-
-/* CARDS */
 .card{
 background:white;
-padding:20px;
-border-radius:12px;
-box-shadow:0 6px 15px rgba(0,0,0,0.08);
-margin-bottom:20px;
+padding:15px;
+margin:10px 0;
+border-radius:10px;
+box-shadow:0 4px 10px rgba(0,0,0,0.1);
 }
 
 .grid{
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-gap:20px;
-}
-
-.scholarship{
-overflow:hidden;
-transition:0.3s;
-}
-
-.scholarship img{
-width:100%;
-height:150px;
-object-fit:cover;
-border-radius:10px;
-margin-bottom:10px;
-}
-
-.scholarship:hover{
-transform:translateY(-5px);
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:15px;
 }
 
 .locked{
 opacity:0.5;
 }
 
-#user-section, #admin-section{
-display:none;
-}
-
-/* PREMIUM */
-.premium{
-border:2px dashed #10b981;
-text-align:center;
-}
-
+#user-section{display:none;}
+#admin-section{display:none;}
 </style>
 </head>
 
@@ -122,16 +73,16 @@ text-align:center;
 
 <div class="hero">
 <h1>🎓 Scholar Match</h1>
-<p>Discover Scholarships That Fit You</p>
+<p>Find Scholarships That Fit You</p>
 </div>
 
 <!-- AUTH -->
-<div id="auth-section" class="auth-box">
+<div id="auth-section">
 <h3>Login / Sign Up</h3>
-<input type="email" id="email" placeholder="Email"><br>
-<input type="password" id="password" placeholder="Password"><br>
-<button id="signupBtn">Sign Up</button>
-<button id="loginBtn">Login</button>
+<input id="email" placeholder="Email"><br>
+<input id="password" placeholder="Password"><br>
+<button onclick="signup()">Sign Up</button>
+<button onclick="login()">Login</button>
 </div>
 
 <!-- USER -->
@@ -154,33 +105,32 @@ text-align:center;
 <button onclick="saveProfile()">Save Profile</button>
 </div>
 
-<div class="card premium">
+<div class="card">
 <h3>💎 Premium</h3>
-<p id="premium-status">Free User</p>
-<button onclick="activatePremium()">Unlock Premium</button>
+<p id="premiumStatus">Free User</p>
+<button onclick="activatePremium()">Activate Premium (Test)</button>
 </div>
 
-<h3>Available Scholarships</h3>
-<div id="scholarship-list" class="grid"></div>
+<h3>Scholarships</h3>
+<div id="list" class="grid"></div>
 
 <!-- ADMIN -->
 <div id="admin-section" class="card">
 <h3>Add Scholarship</h3>
 <input id="title" placeholder="Title"><br>
 <input id="description" placeholder="Description"><br>
-<input id="link" placeholder="Application Link"><br>
+<input id="link" placeholder="Link"><br>
 
-<select id="levelScholarship">
-<option>Primary School</option>
-<option>High School</option>
-<option>College</option>
-<option>University</option>
+<select id="type">
+<option value="free">Free</option>
+<option value="premium">Premium</option>
 </select><br>
 
-<button id="addScholarshipBtn">Add Scholarship</button>
+<button onclick="addScholarship()">Add</button>
 </div>
 
-<button id="logoutBtn">Logout</button>
+<br>
+<button onclick="logout()">Logout</button>
 
 </div>
 
@@ -208,44 +158,28 @@ const db = getFirestore(app);
 
 const adminEmail = "lethabophenyo53@gmail.com";
 
-/* ELEMENTS */
-const email = document.getElementById("email");
-const password = document.getElementById("password");
-const authSection = document.getElementById("auth-section");
-const userSection = document.getElementById("user-section");
-const adminSection = document.getElementById("admin-section");
-const welcome = document.getElementById("welcome");
-const scholarshipList = document.getElementById("scholarship-list");
-const premiumStatus = document.getElementById("premium-status");
-
 /* AUTH */
-signupBtn.onclick = async () => {
-if(!email.value || !password.value){
-alert("Fill all fields");
-return;
-}
+window.signup = async () => {
 await createUserWithEmailAndPassword(auth,email.value,password.value);
 };
 
-loginBtn.onclick = async () => {
-if(!email.value || !password.value){
-alert("Fill all fields");
-return;
-}
+window.login = async () => {
 await signInWithEmailAndPassword(auth,email.value,password.value);
 };
 
-logoutBtn.onclick = () => signOut(auth);
+window.logout = () => signOut(auth);
 
 /* AUTH STATE */
-onAuthStateChanged(auth, async (user) => {
+onAuthStateChanged(auth, async (user)=>{
 
 if(user){
+
 authSection.style.display="none";
 userSection.style.display="block";
 
 welcome.innerText="Welcome " + user.email;
 
+/* ADMIN */
 adminSection.style.display = user.email === adminEmail ? "block" : "none";
 
 /* PROFILE */
@@ -261,12 +195,11 @@ loadScholarships();
 }else{
 authSection.style.display="block";
 userSection.style.display="none";
-adminSection.style.display="none";
 }
 
 });
 
-/* PROFILE SAVE */
+/* SAVE PROFILE */
 window.saveProfile = async () => {
 const user = auth.currentUser;
 
@@ -281,10 +214,10 @@ level:level.value,
 premium:premium
 });
 
-alert("Profile Saved ✅");
+alert("Saved!");
 };
 
-/* PREMIUM */
+/* PREMIUM (TEMP) */
 window.activatePremium = async () => {
 const user = auth.currentUser;
 
@@ -299,44 +232,39 @@ loadScholarships();
 };
 
 /* ADD SCHOLARSHIP */
-addScholarshipBtn.onclick = async () => {
+window.addScholarship = async () => {
 await addDoc(collection(db,"scholarships"),{
 title:title.value,
 description:description.value,
 link:link.value,
-level:levelScholarship.value,
+type:type.value,
 image:"https://images.unsplash.com/photo-1523050854058-8df90110c9f1"
 });
 
-alert("Added ✅");
+alert("Added!");
 loadScholarships();
 };
 
-/* LOAD SCHOLARSHIPS */
+/* LOAD */
 async function loadScholarships(){
-
-scholarshipList.innerHTML="Loading...";
 
 const snapshot = await getDocs(collection(db,"scholarships"));
 
-scholarshipList.innerHTML="";
+list.innerHTML="";
 
-snapshot.forEach(docSnap=>{
-const s = docSnap.data();
+snapshot.forEach(doc=>{
+const s = doc.data();
 
-const locked = (s.level==="University" && !window.isPremiumUser);
+const locked = (s.type === "premium" && !window.isPremiumUser);
 
-const div=document.createElement("div");
-div.className="card scholarship " + (locked ? "locked":"");
-
-div.innerHTML=`
-<img src="${s.image}" />
+list.innerHTML += `
+<div class="card ${locked ? "locked":""}">
+<img src="${s.image}" style="width:100%;border-radius:8px;">
 <h4>${s.title}</h4>
 <p>${s.description}</p>
 ${locked ? "🔒 Premium Only" : `<a href="${s.link}" target="_blank">Apply</a>`}
+</div>
 `;
-
-scholarshipList.appendChild(div);
 });
 
 }
