@@ -109,22 +109,34 @@ opacity:0.5;
 <h3>💎 Premium</h3>
 <p id="premiumStatus">Free User</p>
 
-<form id="payfastForm" action="https://sandbox.payfast.co.za/eng/process" method="post">
+  <h2>Upgrade to Premium</h2>
 
-<input type="hidden" name="merchant_id" value="10000100">
-<input type="hidden" name="merchant_key" value="46f0cd694581a">
+  <!-- PayFast Form -->
+  <form action="https://www.payfast.co.za/eng/process" method="post">
 
-<input type="hidden" name="amount" value="50.00">
-<input type="hidden" name="item_name" value="Scholar Match Premium">
+    <!-- Merchant details -->
+    <input type="hidden" name="merchant_id" value="YOUR_MERCHANT_ID">
+    <input type="hidden" name="merchant_key" value="YOUR_MERCHANT_KEY">
 
-<input type="hidden" name="return_url" value="http://localhost:5500/success.html">
-<input type="hidden" name="cancel_url" value="http://localhost:5500/cancel.html">
+    <!-- Buyer details -->
+    <input type="hidden" name="email_address" value="user@example.com">
 
-<input type="hidden" name="email_address" id="payfast-email">
+    <!-- Payment details -->
+    <input type="hidden" name="amount" value="100.00">
+    <input type="hidden" name="item_name" value="Premium Subscription">
 
-<button type="submit">Upgrade to Premium 💳</button>
+    <!-- IMPORTANT: Firebase Function URL -->
+    <input type="hidden" name="notify_url" value="https://us-central1-scholarship-platform-ec01f.cloudfunctions.net/payfastITN">
 
-</form>
+    <!-- Return URLs -->
+    <input type="hidden" name="return_url" value="success.html">
+    <input type="hidden" name="cancel_url" value="cancel.html">
+
+    <!-- Submit button -->
+    <button type="submit">Pay with PayFast</button>
+
+  </form>
+
 
 </div>
 <h3>Scholarships</h3>
