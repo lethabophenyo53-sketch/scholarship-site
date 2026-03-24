@@ -104,8 +104,8 @@ opacity:0.5;
 <input type="hidden" name="return_url" value="http://localhost:5500/success.html">
 <input type="hidden" name="cancel_url" value="http://localhost:5500/cancel.html">
 
-<!-- 🔐 IMPORTANT -->
-<input type="hidden" name="notify_url" value="PASTE_YOUR_FUNCTION_URL_HERE">
+<!-- 🔴 IMPORTANT: PUT YOUR FUNCTION URL HERE -->
+<input type="hidden" name="notify_url" value="PASTE_FUNCTION_URL_HERE">
 
 <input type="hidden" name="email_address" id="payfast-email">
 
@@ -172,7 +172,7 @@ userSection.style.display="block";
 
 welcome.innerText="Welcome " + user.email;
 
-/* AUTO FILL PAYFAST EMAIL */
+/* SET EMAIL FOR PAYFAST */
 document.getElementById("payfast-email").value = user.email;
 
 /* CHECK PREMIUM */
@@ -213,7 +213,7 @@ const locked = (s.type === "premium" && !window.isPremiumUser);
 
 list.innerHTML += `
 <div class="card ${locked ? "locked":""}">
-<img src="${s.image}" style="width:100%;border-radius:8px;">
+<img src="${s.image || "https://images.unsplash.com/photo-1523050854058-8df90110c9f1"}" style="width:100%;border-radius:8px;">
 <h4>${s.title}</h4>
 <p>${s.description}</p>
 
