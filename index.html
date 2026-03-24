@@ -14,7 +14,7 @@ background:#f5f7fb;
 }
 
 .container{
-max-width:1200px;
+max-width:1100px;
 margin:auto;
 padding:20px;
 }
@@ -22,17 +22,18 @@ padding:20px;
 .hero{
 background:linear-gradient(135deg,#4f46e5,#7c3aed);
 color:white;
-padding:50px;
+padding:40px;
 border-radius:15px;
 text-align:center;
-margin-bottom:20px;
 }
 
 input,select{
 padding:10px;
-margin:5px;
+margin:5px 0;
 border-radius:8px;
 border:1px solid #ddd;
+width:100%;
+max-width:300px;
 }
 
 button{
@@ -47,7 +48,7 @@ cursor:pointer;
 .card{
 background:white;
 padding:15px;
-margin:10px 0;
+margin:10px;
 border-radius:10px;
 box-shadow:0 4px 10px rgba(0,0,0,0.1);
 }
@@ -61,9 +62,6 @@ gap:15px;
 .locked{
 opacity:0.5;
 }
-
-#user-section{display:none;}
-#admin-section{display:none;}
 </style>
 </head>
 
@@ -73,91 +71,64 @@ opacity:0.5;
 
 <div class="hero">
 <h1>🎓 Scholar Match</h1>
-<p>Find Scholarships That Fit You</p>
+<p>Find Scholarships Easily</p>
 </div>
 
 <!-- AUTH -->
 <div id="auth-section">
 <h3>Login / Sign Up</h3>
 <input id="email" placeholder="Email"><br>
-<input id="password" placeholder="Password"><br>
+<input id="password" type="password" placeholder="Password"><br>
 <button onclick="signup()">Sign Up</button>
 <button onclick="login()">Login</button>
 </div>
 
 <!-- USER -->
-<div id="user-section">
+<div id="user-section" style="display:none;">
 
 <h2 id="welcome"></h2>
 
+<!-- PREMIUM -->
 <div class="card">
-<h3>Your Profile</h3>
-<input id="country" placeholder="Country"><br>
+<h3>💎 Premium</h3>
+<p id="premiumStatus">Checking...</p>
 
-<select id="level">
-<option value="">Select Level</option>
+<form action="https://sandbox.payfast.co.za/eng/process" method="post">
+
+<input type="hidden" name="merchant_id" value="10000100">
+<input type="hidden" name="merchant_key" value="46f0cd694581a">
+
+<input type="hidden" name="amount" value="50.00">
+<input type="hidden" name="item_name" value="Scholar Match Premium">
+
+<input type="hidden" name="return_url" value="http://localhost:5500/success.html">
+<input type="hidden" name="cancel_url" value="http://localhost:5500/cancel.html">
+
+<!-- 🔐 IMPORTANT -->
+<input type="hidden" name="notify_url" value="PASTE_YOUR_FUNCTION_URL_HERE">
+
+<input type="hidden" name="email_address" id="payfast-email">
+
+<button type="submit">Upgrade to Premium 💳</button>
+
+</form>
+
+</div>
+
+<h3>Scholarships</h3>
+
+<input id="search" placeholder="Search..." oninput="loadScholarships()">
+
+<select id="filterLevel" onchange="loadScholarships()">
+<option value="">All Levels</option>
 <option>Primary School</option>
 <option>High School</option>
 <option>College</option>
 <option>University</option>
-</select><br>
+</select>
 
-<button onclick="saveProfile()">Save Profile</button>
-</div>
-
-<div class="card">
-<h3>💎 Premium</h3>
-<p id="premiumStatus">Free User</p>
-
-  <h2>Upgrade to Premium</h2>
-
-  <!-- PayFast Form -->
-  <form action="https://www.payfast.co.za/eng/process" method="post">
-
-    <!-- Merchant details -->
-    <input type="hidden" name="merchant_id" value="YOUR_MERCHANT_ID">
-    <input type="hidden" name="merchant_key" value="YOUR_MERCHANT_KEY">
-
-    <!-- Buyer details -->
-    <input type="hidden" name="email_address" value="user@example.com">
-
-    <!-- Payment details -->
-    <input type="hidden" name="amount" value="100.00">
-    <input type="hidden" name="item_name" value="Premium Subscription">
-
-    <!-- IMPORTANT: Firebase Function URL -->
-    <input type="hidden" name="notify_url" value="https://us-central1-scholarship-platform-ec01f.cloudfunctions.net/payfastITN">
-
-    <!-- Return URLs -->
-    <input type="hidden" name="return_url" value="success.html">
-    <input type="hidden" name="cancel_url" value="cancel.html">
-
-    <!-- Submit button -->
-    <button type="submit">Pay with PayFast</button>
-
-  </form>
-
-
-</div>
-<h3>Scholarships</h3>
 <div id="list" class="grid"></div>
 
-<!-- ADMIN -->
-<div id="admin-section" class="card">
-<h3>Add Scholarship</h3>
-<input id="title" placeholder="Title"><br>
-<input id="description" placeholder="Description"><br>
-<input id="link" placeholder="Link"><br>
-
-<select id="type">
-<option value="free">Free</option>
-<option value="premium">Premium</option>
-</select><br>
-
-<button onclick="addScholarship()">Add</button>
-</div>
-
-<br>
 <button onclick="logout()">Logout</button>
 
 </div>
@@ -168,23 +139,17 @@ opacity:0.5;
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, setDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-/* FIREBASE CONFIG */
 const firebaseConfig = {
 apiKey: "AIzaSyDB94Hy6sFUBXE4ObSOQmPW5As4Fbxaoi4",
 authDomain: "scholarship-platform-ec01f.firebaseapp.com",
-projectId: "scholarship-platform-ec01f",
-storageBucket: "scholarship-platform-ec01f.appspot.com",
-messagingSenderId: "807575045909",
-appId: "1:807575045909:web:9a61a548638423d7988b1c"
+projectId: "scholarship-platform-ec01f"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-
-const adminEmail = "lethabophenyo53@gmail.com";
 
 /* AUTH */
 window.signup = async () => {
@@ -206,14 +171,12 @@ authSection.style.display="none";
 userSection.style.display="block";
 
 welcome.innerText="Welcome " + user.email;
+
+/* AUTO FILL PAYFAST EMAIL */
 document.getElementById("payfast-email").value = user.email;
 
-/* ADMIN */
-adminSection.style.display = user.email === adminEmail ? "block" : "none";
-
-/* PROFILE */
-const ref = doc(db,"profiles",user.uid);
-const snap = await getDoc(ref);
+/* CHECK PREMIUM */
+const snap = await getDoc(doc(db,"profiles",user.uid));
 
 window.isPremiumUser = snap.exists() ? snap.data().premium : false;
 
@@ -228,61 +191,23 @@ userSection.style.display="none";
 
 });
 
-/* SAVE PROFILE */
-window.saveProfile = async () => {
-const user = auth.currentUser;
-
-const ref = doc(db,"profiles",user.uid);
-const snap = await getDoc(ref);
-
-let premium = snap.exists() ? snap.data().premium : false;
-
-await setDoc(ref,{
-country:country.value,
-level:level.value,
-premium:premium
-});
-
-alert("Saved!");
-};
-
-/* PREMIUM (TEMP) */
-window.activatePremium = async () => {
-const user = auth.currentUser;
-
-await setDoc(doc(db,"profiles",user.uid),{
-premium:true
-},{merge:true});
-
-window.isPremiumUser = true;
-premiumStatus.innerText = "💎 Premium User";
-
-loadScholarships();
-};
-
-/* ADD SCHOLARSHIP */
-window.addScholarship = async () => {
-await addDoc(collection(db,"scholarships"),{
-title:title.value,
-description:description.value,
-link:link.value,
-type:type.value,
-image:"https://images.unsplash.com/photo-1523050854058-8df90110c9f1"
-});
-
-alert("Added!");
-loadScholarships();
-};
-
-/* LOAD */
+/* LOAD SCHOLARSHIPS */
 async function loadScholarships(){
 
 const snapshot = await getDocs(collection(db,"scholarships"));
 
 list.innerHTML="";
 
+const searchValue = document.getElementById("search").value.toLowerCase();
+const filterLevel = document.getElementById("filterLevel").value;
+
 snapshot.forEach(doc=>{
 const s = doc.data();
+
+const matchesSearch = s.title.toLowerCase().includes(searchValue);
+const matchesLevel = filterLevel ? s.level === filterLevel : true;
+
+if(!matchesSearch || !matchesLevel) return;
 
 const locked = (s.type === "premium" && !window.isPremiumUser);
 
@@ -291,7 +216,11 @@ list.innerHTML += `
 <img src="${s.image}" style="width:100%;border-radius:8px;">
 <h4>${s.title}</h4>
 <p>${s.description}</p>
-${locked ? "🔒 Premium Only" : `<a href="${s.link}" target="_blank">Apply</a>`}
+
+${locked 
+? "<p>🔒 Premium Only</p>" 
+: `<a href="${s.link}" target="_blank">Apply</a>`}
+
 </div>
 `;
 });
