@@ -58,6 +58,11 @@ display:grid;
 grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
 gap:15px;
 }
+  
+  .card:hover{
+transform:translateY(-5px);
+transition:0.2s;
+}
 
 .locked{
 opacity:0.5;
@@ -228,6 +233,7 @@ loadScholarships();
 authSection.style.display="block";
 userSection.style.display="none";
 adminSection.style.display="none";
+list.innerHTML = "Loading scholarships...";
 
 }
 
@@ -276,6 +282,7 @@ list.innerHTML += `
 <div class="card ${locked ? "locked":""}">
 <h4>${s.title}</h4>
 <p>${s.description}</p>
+<p><strong>Level:</strong> ${s.level}</p>
 
 ${locked 
 ? "<p>🔒 Premium Only</p>" 
