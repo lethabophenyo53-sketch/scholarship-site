@@ -114,6 +114,31 @@ opacity:0.5;
 
 </div>
 
+<!-- ADMIN -->
+<div id="admin-section" class="card" style="display:none;">
+
+<h3>👑 Admin - Add Scholarship</h3>
+
+<input id="title" placeholder="Title"><br>
+<input id="description" placeholder="Description"><br>
+<input id="link" placeholder="Application Link"><br>
+
+<select id="levelScholarship">
+<option>Primary School</option>
+<option>High School</option>
+<option>College</option>
+<option>University</option>
+</select>
+
+<select id="typeScholarship">
+<option value="free">Free</option>
+<option value="premium">Premium</option>
+</select>
+
+<button onclick="addScholarship()">Add Scholarship</button>
+
+</div>
+
 <h3>Scholarships</h3>
 
 <input id="search" placeholder="Search..." oninput="loadScholarships()">
@@ -138,7 +163,7 @@ opacity:0.5;
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, getDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
 apiKey: "AIzaSyDB94Hy6sFUBXE4ObSOQmPW5As4Fbxaoi4",
@@ -150,12 +175,15 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-/* FIXED VARIABLES */
+/* ELEMENTS */
 const authSection = document.getElementById("auth-section");
 const userSection = document.getElementById("user-section");
 const welcome = document.getElementById("welcome");
 const list = document.getElementById("list");
 const premiumStatus = document.getElementById("premiumStatus");
+const adminSection = document.getElementById("admin-section");
+
+const adminEmail = "lethabophenyo53@gmail.com";
 
 /* AUTH */
 window.signup = async () => {
@@ -178,8 +206,15 @@ userSection.style.display="block";
 
 welcome.innerText="Welcome " + user.email;
 
+/* ADMIN */
+if(user.email === adminEmail){
+adminSection.style.display = "block";
+}
+
+/* PAYFAST EMAIL */
 document.getElementById("payfast-email").value = user.email;
 
+/* CHECK PREMIUM */
 const snap = await getDoc(doc(db,"profiles",user.uid));
 
 window.isPremiumUser = snap.exists() ? snap.data().premium : false;
@@ -189,14 +224,36 @@ premiumStatus.innerText = window.isPremiumUser ? "💎 Premium User" : "Free Use
 loadScholarships();
 
 }else{
+
 authSection.style.display="block";
 userSection.style.display="none";
+adminSection.style.display="none";
+
 }
 
 });
 
-/* LOAD */
-async function loadScholarships(){
+/* ADD SCHOLARSHIP */
+window.addScholarship = async () => {
+
+await addDoc(collection(db,"scholarships"),{
+
+title: document.getElementById("title").value,
+description: document.getElementById("description").value,
+link: document.getElementById("link").value,
+level: document.getElementById("levelScholarship").value,
+type: document.getElementById("typeScholarship").value
+
+});
+
+alert("Scholarship Added 🎉");
+
+loadScholarships();
+
+};
+
+/* LOAD SCHOLARSHIPS */
+window.loadScholarships = async function(){
 
 const snapshot = await getDocs(collection(db,"scholarships"));
 
@@ -205,8 +262,8 @@ list.innerHTML="";
 const searchValue = document.getElementById("search").value.toLowerCase();
 const filterLevel = document.getElementById("filterLevel").value;
 
-snapshot.forEach(doc=>{
-const s = doc.data();
+snapshot.forEach(docSnap=>{
+const s = docSnap.data();
 
 const matchesSearch = s.title.toLowerCase().includes(searchValue);
 const matchesLevel = filterLevel ? s.level === filterLevel : true;
@@ -228,7 +285,7 @@ ${locked
 `;
 });
 
-}
+};
 
 </script>
 
