@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Scholar Match Pro+ (Production)</title>
+<title>Scholar Match Pro+ (Final Boss)</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
@@ -35,7 +35,7 @@ font-weight:700;
 
 .content{
 padding:14px;
-padding-bottom:80px;
+padding-bottom:90px;
 }
 
 .section{display:none;}
@@ -103,10 +103,11 @@ font-size:11px;
 .premium{border:2px dashed #4f46e5;background:#fafaff;}
 </style>
 </head>
+
 <body>
 
 <div class="app">
-<div class="header">🎓 Scholar Match Pro+</div>
+<div class="header">🎓 Scholar Match Pro+ FINAL BOSS</div>
 
 <div class="content">
 
@@ -124,8 +125,9 @@ font-size:11px;
 <h3 id="welcome"></h3>
 
 <div class="card">
-<h4>🎯 Profile</h4>
+<h4>🎯 Profile Level</h4>
 <select id="level">
+<option>Primary School</option>
 <option>High School</option>
 <option>College</option>
 <option>University</option>
@@ -134,7 +136,7 @@ font-size:11px;
 </div>
 
 <div class="card premium">
-<h4>💎 Premium</h4>
+<h4>💎 Premium Upgrade</h4>
 <p id="status">Free User</p>
 <button onclick="pay()">Upgrade R50</button>
 </div>
@@ -142,7 +144,7 @@ font-size:11px;
 
 <!-- SCHOLARSHIPS -->
 <div id="funding" class="section">
-<h3>Scholarships</h3>
+<h3>Scholarships & Funding</h3>
 <div id="list"></div>
 </div>
 
@@ -159,7 +161,7 @@ font-size:11px;
 <!-- AI -->
 <div id="ai" class="section">
 <h3>🤖 AI Helper</h3>
-<input id="aiInput" placeholder="Ask for motivation letter..." />
+<input id="aiInput" placeholder="Ask for help..." />
 <button onclick="ai()">Generate</button>
 <p id="aiOut"></p>
 </div>
@@ -171,11 +173,18 @@ font-size:11px;
 <input id="desc" placeholder="Description" />
 <input id="link" placeholder="Link" />
 <input id="deadline" type="date" />
+<select id="level">
+<option>Primary School</option>
+<option>High School</option>
+<option>College</option>
+<option>University</option>
+<option>All</option>
+</select>
 <select id="type">
 <option value="free">Free</option>
 <option value="premium">Premium</option>
 </select>
-<button onclick="addScholarship()">Add</button>
+<button onclick="addScholarship()">Add Scholarship</button>
 </div>
 
 </div>
@@ -205,25 +214,29 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-let profile = null;
+let profile;
 
-function show(id){
+function go(id){
 document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
 document.getElementById(id).classList.add('active');
 }
 
-window.go = show;
+window.go = go;
 
 window.signup = async () => {
 const u = await createUserWithEmailAndPassword(auth,email.value,password.value);
-await setDoc(doc(db,"profiles",u.user.uid),{premium:false,level:"",apps:0});
+await setDoc(doc(db,"profiles",u.user.uid),{
+premium:false,
+level:"Primary School",
+apps:0
+});
 };
 
-window.login = ( ) => signInWithEmailAndPassword(auth,email.value,password.value);
+window.login = () => signInWithEmailAndPassword(auth,email.value,password.value);
 
 onAuthStateChanged(auth, async (u)=>{
 if(u){
-show('home');
+go('home');
 const snap = await getDoc(doc(db,"profiles",u.uid));
 profile = snap.data();
 
@@ -231,7 +244,7 @@ welcome.innerText = "Welcome " + u.email;
 status.innerText = profile.premium ? "Premium User 💎" : "Free User";
 loadScholarships();
 }else{
-show('auth');
+go('auth');
 }
 });
 
@@ -245,7 +258,7 @@ window.open("https://www.payfast.co.za/","_blank");
 };
 
 function countdown(d){
-const diff = new Date(d) - new Date();
+const diff = new Date(d)-new Date();
 if(diff<=0) return "Closed";
 return Math.floor(diff/86400000)+" days left";
 }
@@ -256,11 +269,14 @@ const snap = await getDocs(collection(db,"scholarships"));
 
 snap.forEach(s=>{
 const d = s.data();
-const locked = d.type==="premium" && !profile.premium;
+
+if(profile.level && d.level !== profile.level && d.level !== "All") return;
+
+const locked = d.type === "premium" && !profile.premium;
 
 list.innerHTML += `
 <div class="card ${locked?'locked':''}">
-<span class="badge">${d.level || 'All'}</span>
+<span class="badge">${d.level}</span>
 <h4>${d.title}</h4>
 <p>${d.desc}</p>
 <p class="small">⏳ ${countdown(d.deadline)}</p>
@@ -276,18 +292,18 @@ desc:desc.value,
 link:link.value,
 deadline:deadline.value,
 type:type.value,
-level:"All"
+level:level.value
 });
 loadScholarships();
 };
 
 window.ai = () => {
-aiOut.innerText = "AI: " + aiInput.value + " — You are capable and ready.";
+aiOut.innerText = "AI: " + aiInput.value + " — You are capable, start applying now.";
 };
 
 window.notify = () => {
 Notification.requestPermission().then(p=>{
-if(p==='granted') new Notification("Scholar Match Pro+",{body:"Alerts enabled"});
+if(p==='granted') new Notification("Scholar Match Pro+",{body:"New opportunities available"});
 });
 };
 </script>
