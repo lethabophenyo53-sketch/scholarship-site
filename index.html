@@ -1,50 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Scholar Match Pro+</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Scholar Match Pro+ (Production)</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
-body{font-family:'Poppins',sans-serif;margin:0;background:#eef2ff;}
-.container{max-width:1100px;margin:auto;padding:20px;}
-.hero{background:linear-gradient(135deg,#4f46e5,#7c3aed);color:white;padding:60px 20px;border-radius:20px;text-align:center;}
-.hero h1{margin:0;font-size:42px;}
-.hero p{margin-top:10px;font-size:18px;opacity:0.9;}
-input,select{padding:12px;margin:6px 0;border-radius:10px;border:1px solid #ddd;width:100%;max-width:320px;}
-button{padding:12px 20px;border:none;border-radius:10px;background:#4f46e5;color:white;cursor:pointer;font-weight:500;}
-.card{background:white;padding:18px;margin:10px;border-radius:15px;box-shadow:0 6px 15px rgba(0,0,0,0.08);transition:0.2s;}
-.card:hover{transform:translateY(-4px);}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px;}
-.locked{opacity:0.6;}
-.premium-box{border:2px dashed #4f46e5;background:#fafaff;}
-.badge{background:#4f46e5;color:white;padding:4px 10px;border-radius:20px;font-size:12px;display:inline-block;margin-bottom:8px;}
-.countdown{font-size:12px;color:#ef4444;margin-top:5px;}
+*{box-sizing:border-box;}
+body{
+margin:0;
+font-family:'Poppins',sans-serif;
+background:#eef2ff;
+}
+
+.app{
+max-width:430px;
+margin:auto;
+min-height:100vh;
+background:#fff;
+box-shadow:0 10px 40px rgba(0,0,0,0.15);
+position:relative;
+overflow:hidden;
+}
+
+.header{
+background:linear-gradient(135deg,#4f46e5,#7c3aed);
+color:white;
+padding:18px;
+text-align:center;
+font-weight:700;
+}
+
+.content{
+padding:14px;
+padding-bottom:80px;
+}
+
+.section{display:none;}
+.active{display:block;}
+
+.card{
+background:white;
+padding:14px;
+margin:10px 0;
+border-radius:16px;
+box-shadow:0 6px 16px rgba(0,0,0,0.08);
+}
+
+input,select{
+width:100%;
+padding:12px;
+margin:6px 0;
+border-radius:10px;
+border:1px solid #ddd;
+}
+
+button{
+width:100%;
+padding:12px;
+margin-top:6px;
+border:none;
+border-radius:10px;
+background:#4f46e5;
+color:white;
+font-weight:600;
+}
+
+button:hover{opacity:0.9;cursor:pointer;}
+
+.nav{
+position:fixed;
+bottom:0;
+left:50%;
+transform:translateX(-50%);
+width:430px;
+max-width:100%;
+display:flex;
+background:white;
+box-shadow:0 -5px 20px rgba(0,0,0,0.1);
+}
+
+.nav button{
+flex:1;
+background:none;
+color:#4f46e5;
+font-size:11px;
+padding:10px;
+}
+
+.badge{
+background:#4f46e5;
+color:white;
+padding:3px 8px;
+border-radius:20px;
+font-size:11px;
+}
+
+.locked{opacity:0.5;}
+.small{font-size:12px;color:#ef4444;}
+.premium{border:2px dashed #4f46e5;background:#fafaff;}
 </style>
 </head>
-
 <body>
-<div class="container">
 
-<div class="hero">
-<h1>🎓 Scholar Match Pro+</h1>
-<p><strong>Your AI assistant for getting funded</strong></p>
-</div>
+<div class="app">
+<div class="header">🎓 Scholar Match Pro+</div>
 
-<div id="auth-section">
-<h3>Login / Sign Up</h3>
-<input id="email" placeholder="Email"><br>
-<input id="password" type="password" placeholder="Password"><br>
+<div class="content">
+
+<!-- AUTH -->
+<div id="auth" class="section active">
+<h3>Welcome</h3>
+<input id="email" placeholder="Email" />
+<input id="password" type="password" placeholder="Password" />
 <button onclick="signup()">Sign Up</button>
 <button onclick="login()">Login</button>
 </div>
 
-<div id="user-section" style="display:none;">
-<h2 id="welcome"></h2>
+<!-- HOME -->
+<div id="home" class="section">
+<h3 id="welcome"></h3>
 
 <div class="card">
-<h3>🎯 Your Profile</h3>
-<select id="userLevel">
+<h4>🎯 Profile</h4>
+<select id="level">
 <option>High School</option>
 <option>College</option>
 <option>University</option>
@@ -52,55 +133,67 @@ button{padding:12px 20px;border:none;border-radius:10px;background:#4f46e5;color
 <button onclick="saveProfile()">Save Profile</button>
 </div>
 
-<div class="card premium-box">
-<h3>💎 Premium (R50)</h3>
-<p id="premiumStatus"></p>
-<p>
-✔ Smart matching<br>
-✔ Deadline alerts<br>
-✔ AI application help<br>
-✔ Exclusive scholarships
-</p>
-<button onclick="fakeUpgrade()">Upgrade (Test Mode)</button>
+<div class="card premium">
+<h4>💎 Premium</h4>
+<p id="status">Free User</p>
+<button onclick="pay()">Upgrade R50</button>
+</div>
 </div>
 
-<div id="admin-section" class="card" style="display:none;">
-<h3>👑 Add Scholarship</h3>
-<input id="title" placeholder="Title"><br>
-<input id="description" placeholder="Description"><br>
-<input id="link" placeholder="Application Link"><br>
-<input id="deadline" type="date"><br>
-<select id="levelScholarship">
-<option>High School</option>
-<option>College</option>
-<option>University</option>
-</select>
-<select id="typeScholarship">
+<!-- SCHOLARSHIPS -->
+<div id="funding" class="section">
+<h3>Scholarships</h3>
+<div id="list"></div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="section">
+<h3>📊 Dashboard</h3>
+<div class="card">
+<p>Applications: <span id="apps">0</span></p>
+<p>Saved: <span id="saved">0</span></p>
+<button onclick="notify()">Enable Alerts</button>
+</div>
+</div>
+
+<!-- AI -->
+<div id="ai" class="section">
+<h3>🤖 AI Helper</h3>
+<input id="aiInput" placeholder="Ask for motivation letter..." />
+<button onclick="ai()">Generate</button>
+<p id="aiOut"></p>
+</div>
+
+<!-- ADMIN -->
+<div id="admin" class="section">
+<h3>Admin Panel</h3>
+<input id="title" placeholder="Title" />
+<input id="desc" placeholder="Description" />
+<input id="link" placeholder="Link" />
+<input id="deadline" type="date" />
+<select id="type">
 <option value="free">Free</option>
 <option value="premium">Premium</option>
 </select>
-<button onclick="addScholarship()">Add Scholarship</button>
+<button onclick="addScholarship()">Add</button>
 </div>
 
-<h3>Scholarships For You</h3>
-<div id="list" class="grid"></div>
-
-<!-- AI HELP -->
-<div class="card">
-<h3>🤖 AI Application Helper</h3>
-<input id="aiInput" placeholder="e.g. Write me a motivation letter">
-<button onclick="aiHelp()">Generate</button>
-<p id="aiOutput"></p>
 </div>
 
-<button onclick="logout()">Logout</button>
+<div class="nav">
+<button onclick="go('home')">Home</button>
+<button onclick="go('funding')">Funding</button>
+<button onclick="go('dashboard')">Dashboard</button>
+<button onclick="go('ai')">AI</button>
+<button onclick="go('admin')">Admin</button>
 </div>
+
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, doc, getDoc, setDoc, addDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, addDoc, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
 apiKey: "AIzaSyDB94Hy6sFUBXE4ObSOQmPW5As4Fbxaoi4",
@@ -112,115 +205,92 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const authSection = document.getElementById("auth-section");
-const userSection = document.getElementById("user-section");
-const welcome = document.getElementById("welcome");
-const list = document.getElementById("list");
-const premiumStatus = document.getElementById("premiumStatus");
-const adminSection = document.getElementById("admin-section");
+let profile = null;
 
-const adminEmail = "lethabophenyo53@gmail.com";
+function show(id){
+document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+}
+
+window.go = show;
 
 window.signup = async () => {
-const userCred = await createUserWithEmailAndPassword(auth,email.value,password.value);
-await setDoc(doc(db,"profiles",userCred.user.uid),{
-email:userCred.user.email,
-premium:false,
-level:""
-});
+const u = await createUserWithEmailAndPassword(auth,email.value,password.value);
+await setDoc(doc(db,"profiles",u.user.uid),{premium:false,level:"",apps:0});
 };
 
-window.login = async () => {
-await signInWithEmailAndPassword(auth,email.value,password.value);
-};
+window.login = ( ) => signInWithEmailAndPassword(auth,email.value,password.value);
 
-window.logout = () => signOut(auth);
+onAuthStateChanged(auth, async (u)=>{
+if(u){
+show('home');
+const snap = await getDoc(doc(db,"profiles",u.uid));
+profile = snap.data();
 
-onAuthStateChanged(auth, async (user)=>{
-if(user){
-authSection.style.display="none";
-userSection.style.display="block";
-welcome.innerText="Welcome " + user.email;
-if(user.email === adminEmail){adminSection.style.display="block";}
-
-const snap = await getDoc(doc(db,"profiles",user.uid));
-window.userProfile = snap.data();
-window.isPremiumUser = snap.data().premium;
-
-premiumStatus.innerText = window.isPremiumUser ? "💎 Premium User" : "Free User";
-
+welcome.innerText = "Welcome " + u.email;
+status.innerText = profile.premium ? "Premium User 💎" : "Free User";
 loadScholarships();
 }else{
-authSection.style.display="block";
-userSection.style.display="none";
-adminSection.style.display="none";
+show('auth');
 }
 });
 
 window.saveProfile = async () => {
-const user = auth.currentUser;
-await updateDoc(doc(db,"profiles",user.uid),{level:userLevel.value});
-alert("Profile saved 🎯");
+await updateDoc(doc(db,"profiles",auth.currentUser.uid),{level:level.value});
 loadScholarships();
 };
 
-window.fakeUpgrade = async () => {
-const user = auth.currentUser;
-await updateDoc(doc(db,"profiles",user.uid),{premium:true});
-alert("Premium activated 🎉");
-location.reload();
+window.pay = () => {
+window.open("https://www.payfast.co.za/","_blank");
+};
+
+function countdown(d){
+const diff = new Date(d) - new Date();
+if(diff<=0) return "Closed";
+return Math.floor(diff/86400000)+" days left";
+}
+
+window.loadScholarships = async () => {
+list.innerHTML="";
+const snap = await getDocs(collection(db,"scholarships"));
+
+snap.forEach(s=>{
+const d = s.data();
+const locked = d.type==="premium" && !profile.premium;
+
+list.innerHTML += `
+<div class="card ${locked?'locked':''}">
+<span class="badge">${d.level || 'All'}</span>
+<h4>${d.title}</h4>
+<p>${d.desc}</p>
+<p class="small">⏳ ${countdown(d.deadline)}</p>
+${locked ? "🔒 Premium Only" : "<a href='"+d.link+"' target='_blank'>Apply</a>"}
+</div>`;
+});
 };
 
 window.addScholarship = async () => {
 await addDoc(collection(db,"scholarships"),{
 title:title.value,
-description:description.value,
+desc:desc.value,
 link:link.value,
 deadline:deadline.value,
-level:levelScholarship.value,
-type:typeScholarship.value
+type:type.value,
+level:"All"
 });
-alert("Added 🎉");
 loadScholarships();
 };
 
-function getCountdown(deadline){
-const now = new Date();
-const end = new Date(deadline);
-const diff = end - now;
-if(diff <= 0) return "Closed";
-const days = Math.floor(diff/(1000*60*60*24));
-return days + " days left";
-}
+window.ai = () => {
+aiOut.innerText = "AI: " + aiInput.value + " — You are capable and ready.";
+};
 
-window.loadScholarships = async () => {
-list.innerHTML="Loading...";
-const snapshot = await getDocs(collection(db,"scholarships"));
-list.innerHTML="";
-
-snapshot.forEach(docSnap=>{
-const s = docSnap.data();
-if(window.userProfile.level && s.level !== window.userProfile.level) return;
-
-const locked = (s.type === "premium" && !window.isPremiumUser);
-
-list.innerHTML += `
-<div class="card ${locked ? "locked": ""}">
-<span class="badge">${s.level}</span>
-<h4>${s.title}</h4>
-<p>${s.description}</p>
-<p class="countdown">⏳ ${getCountdown(s.deadline)}</p>
-${locked ? "<p>🔒 Premium Only – Exclusive match</p>" : `<a href="${s.link}" target="_blank">Apply Now</a>`}
-</div>`;
+window.notify = () => {
+Notification.requestPermission().then(p=>{
+if(p==='granted') new Notification("Scholar Match Pro+",{body:"Alerts enabled"});
 });
 };
-
-window.aiHelp = () => {
-const input = document.getElementById("aiInput").value;
-document.getElementById("aiOutput").innerText =
-"Here is a strong answer: " + input + ". I am a hardworking and passionate student who is committed to achieving academic excellence and making a positive impact.";
-};
-
 </script>
+
 </body>
 </html>
