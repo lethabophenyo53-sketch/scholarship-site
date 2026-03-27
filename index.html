@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Scholar Match Pro+ SaaS Web</title>
+<title>Scholar Match Pro</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
@@ -21,20 +21,19 @@ margin:auto;
 min-height:100vh;
 background:#fff;
 box-shadow:0 10px 40px rgba(0,0,0,0.12);
-position:relative;
 overflow:hidden;
+position:relative;
 }
 
 .header{
 background:linear-gradient(135deg,#4f46e5,#7c3aed);
 color:white;
-padding:20px;
+padding:18px;
 text-align:center;
 font-weight:700;
-font-size:18px;
 }
 
-.content{padding:14px;padding-bottom:100px;}
+.content{padding:14px; padding-bottom:90px;}
 .section{display:none;}
 .active{display:block;}
 
@@ -42,13 +41,13 @@ font-size:18px;
 background:#fff;
 padding:14px;
 margin:10px 0;
-border-radius:16px;
+border-radius:14px;
 box-shadow:0 6px 18px rgba(0,0,0,0.08);
 }
 
 input,select{
 width:100%;
-padding:12px;
+padding:10px;
 margin:6px 0;
 border-radius:10px;
 border:1px solid #ddd;
@@ -62,10 +61,8 @@ border-radius:10px;
 background:#4f46e5;
 color:white;
 font-weight:600;
-cursor:pointer;
 margin-top:6px;
 }
-button:hover{opacity:0.9;}
 
 .nav{
 position:fixed;
@@ -75,7 +72,7 @@ transform:translateX(-50%);
 width:460px;
 max-width:100%;
 display:flex;
-background:white;
+background:#fff;
 box-shadow:0 -5px 20px rgba(0,0,0,0.1);
 }
 
@@ -83,14 +80,12 @@ box-shadow:0 -5px 20px rgba(0,0,0,0.1);
 flex:1;
 background:none;
 color:#4f46e5;
-font-size:11px;
-padding:10px;
+font-size:12px;
 }
 
 .badge{background:#4f46e5;color:white;padding:4px 8px;border-radius:20px;font-size:11px;}
 .locked{opacity:0.5;}
-.small{font-size:12px;color:#ef4444;}
-
+.small{font-size:12px;color:#666;}
 .admin-only{display:none;}
 </style>
 </head>
@@ -98,7 +93,7 @@ padding:10px;
 <body>
 
 <div class="app">
-<div class="header">🎓 Scholar Match Pro+ SaaS Website</div>
+<div class="header">🎓 Scholar Match Pro</div>
 
 <div class="content">
 
@@ -116,7 +111,7 @@ padding:10px;
 <h3 id="welcome"></h3>
 
 <div class="card">
-<h4>🎯 Your Level</h4>
+<h4>Level</h4>
 <select id="profileLevel">
 <option>Primary School</option>
 <option>High School</option>
@@ -127,15 +122,15 @@ padding:10px;
 </div>
 
 <div class="card">
-<h4>📊 Stats</h4>
+<h4>Stats</h4>
 <p>Scholarships Viewed: <span id="views">0</span></p>
 </div>
 
 <div class="card">
-<h4>💎 Premium</h4>
+<h4>Premium</h4>
 <p id="status">Free User</p>
-<button onclick="pay()">Upgrade R50</button>
 </div>
+
 </div>
 
 <!-- FUNDING -->
@@ -146,10 +141,10 @@ padding:10px;
 
 <!-- DASHBOARD -->
 <div id="dashboard" class="section">
-<h3>📊 Dashboard</h3>
+<h3>Dashboard</h3>
 <div class="card">
 <p>Total Scholarships: <span id="totalScholarships">0</span></p>
-<p>Profile Level: <span id="userLevel"></span></p>
+<p>Level: <span id="userLevel"></span></p>
 </div>
 </div>
 
@@ -176,11 +171,8 @@ padding:10px;
 </select>
 
 <button onclick="addScholarship()">Add Scholarship</button>
-
-<hr>
-<h4>⚙️ Auto System</h4>
-<button onclick="refreshScholarships()">🔄 Auto Refresh (2027)</button>
-<button onclick="clearScholarships()">🧹 Clear All</button>
+<button onclick="refreshScholarships()">Auto Refresh 2027</button>
+<button onclick="clearScholarships()">Clear All</button>
 </div>
 
 </div>
@@ -199,149 +191,160 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, collection, getDocs, addDoc, doc, getDoc, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+// 🔥 PUT YOUR FIREBASE CONFIG HERE
 const firebaseConfig = {
-apiKey:"YOUR_KEY",
-authDomain:"YOUR_DOMAIN",
-projectId:"YOUR_ID"
+apiKey: "AIzaSyDB94Hy6sFUBXE4ObSOQmPW5As4Fbxaoi4",
+authDomain: "scholarship-platform-ec01f.firebaseapp.com",
+projectId: "scholarship-platform-ec01f"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-let profile;
+// ELEMENTS
+const list = document.getElementById("list");
+const views = document.getElementById("views");
+const welcome = document.getElementById("welcome");
+const status = document.getElementById("status");
+const userLevel = document.getElementById("userLevel");
+const totalScholarships = document.getElementById("totalScholarships");
+const profileLevel = document.getElementById("profileLevel");
+
+let profile = null;
 let viewCount = 0;
 
-// ADMIN SECURITY
 const adminEmails = ["admin@gmail.com"];
 let isAdmin = false;
 
-window.go=(id)=>{
-document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-document.getElementById(id).classList.add('active');
+window.go = (id) => {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
 };
 
-window.signup=async()=>{
-const u=await createUserWithEmailAndPassword(auth,email.value,password.value);
-await setDoc(doc(db,"profiles",u.user.uid),{
-premium:false,
-level:"Primary School",
-views:0
-});
+window.signup = async () => {
+  const u = await createUserWithEmailAndPassword(auth, email.value, password.value);
+  await setDoc(doc(db, "profiles", u.user.uid), {
+    premium: false,
+    level: "Primary School",
+    views: 0
+  });
 };
 
-window.login=()=>signInWithEmailAndPassword(auth,email.value,password.value);
+window.login = () => signInWithEmailAndPassword(auth, email.value, password.value);
 
-onAuthStateChanged(auth,async(u)=>{
-if(u){
+onAuthStateChanged(auth, async (u) => {
+  if (u) {
+    isAdmin = adminEmails.includes(u.email);
+    if (isAdmin) document.querySelector('.admin-only').style.display = 'block';
 
-isAdmin = adminEmails.includes(u.email);
-if(isAdmin){document.querySelector('.admin-only').style.display='block';}
+    const snap = await getDoc(doc(db, "profiles", u.uid));
+    profile = snap.exists() ? snap.data() : { level: "Primary School", premium: false, views: 0 };
 
-const snap=await getDoc(doc(db,"profiles",u.uid));
-profile=snap.data();
+    welcome.innerText = "Welcome " + u.email;
+    status.innerText = profile.premium ? "Premium 💎" : "Free";
+    userLevel.innerText = profile.level;
 
-welcome.innerText="Welcome " + u.email;
-status.innerText=profile.premium?"Premium 💎":"Free";
-userLevel.innerText=profile.level;
-
-loadScholarships();
-go('home');
-}else go('auth');
+    loadScholarships();
+    go('home');
+  } else {
+    go('auth');
+  }
 });
 
-window.saveProfile=async()=>{
-await updateDoc(doc(db,"profiles",auth.currentUser.uid),{
-level:profileLevel.value
-});
-profile.level=profileLevel.value;
-loadScholarships();
+window.saveProfile = async () => {
+  await updateDoc(doc(db, "profiles", auth.currentUser.uid), {
+    level: profileLevel.value
+  });
+  profile.level = profileLevel.value;
+  loadScholarships();
 };
 
-function countDown(d){
-const diff=new Date(d)-new Date();
-if(diff<=0) return "Closed";
-return Math.floor(diff/86400000)+" days left";
+function countdown(date) {
+  const diff = new Date(date) - new Date();
+  if (diff <= 0) return "Closed";
+  return Math.floor(diff / 86400000) + " days left";
 }
 
-window.loadScholarships=async()=>{
-list.innerHTML="";
-let snap=await getDocs(collection(db,"scholarships"));
+window.loadScholarships = async () => {
+  list.innerHTML = "";
+  const snap = await getDocs(collection(db, "scholarships"));
 
-let count=0;
+  let count = 0;
 
-snap.forEach(s=>{
-const d=s.data();
-count++;
+  snap.forEach(d => {
+    const data = d.data();
+    count++;
 
-if(profile.level && d.level!==profile.level && d.level!=="All") return;
+    if (profile && data.level !== profile.level && data.level !== "All") return;
 
-const locked=d.type==="premium" && !profile.premium;
+    const locked = data.type === "premium" && !profile?.premium;
 
-list.innerHTML+=`
-<div class='card ${locked?"locked":""}' onclick="trackView()">
-<span class='badge'>${d.level}</span>
-<h4>${d.title}</h4>
-<p>${d.desc}</p>
-<p class='small'>⏳ ${countDown(d.deadline)}</p>
-${locked?"🔒 Premium Only":"<a href='"+d.link+"' target='_blank'>Apply</a>"}
-</div>`;
-});
+    list.innerHTML += `
+      <div class='card ${locked ? "locked" : ""}' onclick='trackView()'>
+        <span class='badge'>${data.level}</span>
+        <h4>${data.title}</h4>
+        <p>${data.desc}</p>
+        <p class='small'>⏳ ${countdown(data.deadline)}</p>
+        ${locked ? "🔒 Premium Only" : `<a href='${data.link}' target='_blank'>Apply</a>`}
+      </div>`;
+  });
 
-totalScholarships.innerText=count;
-userLevel.innerText=profile.level;
+  totalScholarships.innerText = count;
+  if (profile) userLevel.innerText = profile.level;
 };
 
-window.trackView=()=>{
-viewCount++;
-views.innerText=viewCount;
+window.trackView = () => {
+  viewCount++;
+  views.innerText = viewCount;
 };
 
-window.addScholarship=async()=>{
-if(!isAdmin) return alert("Not admin");
-await addDoc(collection(db,"scholarships"),{
-title:title.value,
-desc:desc.value,
-link:link.value,
-deadline:deadline.value,
-type:scholarType.value,
-level:scholarLevel.value
-});
-loadScholarships();
+window.addScholarship = async () => {
+  if (!isAdmin) return alert("Not admin");
+
+  await addDoc(collection(db, "scholarships"), {
+    title: title.value,
+    desc: desc.value,
+    link: link.value,
+    deadline: deadline.value,
+    type: scholarType.value,
+    level: scholarLevel.value
+  });
+
+  loadScholarships();
 };
 
-window.clearScholarships=async()=>{
-if(!isAdmin) return;
-let snap=await getDocs(collection(db,"scholarships"));
-snap.forEach(async(d)=>{
-await deleteDoc(doc(db,"scholarships",d.id));
-});
-alert("Cleared");
+window.clearScholarships = async () => {
+  if (!isAdmin) return;
+
+  const snap = await getDocs(collection(db, "scholarships"));
+  for (const d of snap.docs) {
+    await deleteDoc(doc(db, "scholarships", d.id));
+  }
+
+  loadScholarships();
 };
 
-window.refreshScholarships=async()=>{
-if(!isAdmin) return;
-await clearScholarships();
+window.refreshScholarships = async () => {
+  if (!isAdmin) return;
 
-const data=[
-{title:"NSFAS 2027",desc:"Funding for university students",link:"https://nsfas.org.za",deadline:"2027-01-31",type:"free",level:"University"},
-{title:"Primary School Grant",desc:"Support for learners",link:"https://gov.za",deadline:"2027-03-10",type:"free",level:"Primary School"},
-{title:"Google Scholarship",desc:"Tech training",link:"https://google.com",deadline:"2027-07-01",type:"free",level:"College"}
-];
+  await clearScholarships();
 
-for(let i of data){
-await addDoc(collection(db,"scholarships"),i);
-}
+  const data = [
+    { title: "NSFAS 2027", desc: "University funding", link: "https://nsfas.org.za", deadline: "2027-01-31", type: "free", level: "University" },
+    { title: "Primary Grant", desc: "School support", link: "https://gov.za", deadline: "2027-03-10", type: "free", level: "Primary School" },
+    { title: "Tech Scholarship", desc: "Google training", link: "https://google.com", deadline: "2027-07-01", type: "free", level: "College" }
+  ];
 
-loadScholarships();
-alert("Auto refreshed");
+  for (const i of data) {
+    await addDoc(collection(db, "scholarships"), i);
+  }
+
+  loadScholarships();
+  alert("Refreshed 2027 data");
 };
 
-window.pay=()=>window.open("https://payfast.co.za","_blank");
-window.ai=()=>{aiOut.innerText="Keep going: " + aiInput.value;};
 </script>
 
 </body>
-
-</html>
 </html>
