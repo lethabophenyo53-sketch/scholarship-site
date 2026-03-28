@@ -44,6 +44,8 @@ display:flex;background:#0f172a;border-top:1px solid #333;
 
 .locked{opacity:0.3;filter:blur(2px)}
 .small{font-size:12px;opacity:0.7}
+
+#admin{display:none;}
 </style>
 </head>
 
@@ -108,41 +110,38 @@ display:flex;background:#0f172a;border-top:1px solid #333;
 
 <script type="module">
 
-import { auth, db } from "./firebase.js";
+/* ================= FIREBASE INIT ================= */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } 
+from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-import {
-createUserWithEmailAndPassword,
-signInWithEmailAndPassword,
-onAuthStateChanged,
-signOut
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs, doc, getDoc, setDoc } 
+from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-import {
-collection,
-addDoc,
-getDocs,
-doc,
-getDoc,
-setDoc,
-updateDoc
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+const firebaseConfig = {
+apiKey: "YOUR_API_KEY",
+authDomain: "YOUR_AUTH_DOMAIN",
+projectId: "YOUR_PROJECT_ID"
+};
 
-/* ===== ADMIN EMAIL ===== */
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+/* ================= ADMIN ================= */
 const ADMIN_EMAIL = "lethabophenyo53@gmail.com";
 
 let profile = null;
 
-/* ===== NAVIGATION SAFE ===== */
+/* ================= NAV ================= */
 window.go = (page) => {
-if (!auth.currentUser) {
-page = "auth";
-}
+if (!auth.currentUser) page = "auth";
 
 document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
 document.getElementById(page).classList.add("active");
 };
 
-/* ===== AUTH ===== */
+/* ================= AUTH ================= */
 window.signup = () =>
 createUserWithEmailAndPassword(auth, email.value, password.value)
 .then(async (u) => {
@@ -157,7 +156,7 @@ signInWithEmailAndPassword(auth, email.value, password.value);
 
 window.logout = () => signOut(auth);
 
-/* ===== AUTH STATE FIX ===== */
+/* ================= AUTH STATE ================= */
 onAuthStateChanged(auth, async (user) => {
 
 if (!user) {
@@ -168,6 +167,9 @@ return;
 const ref = doc(db, "users", user.uid);
 const snap = await getDoc(ref);
 
+/* FIX: safe fallback */
+profile = snap.exists() ? snap.data() : { premium: false };
+
 if (!snap.exists()) {
 await setDoc(ref, {
 premium: false,
@@ -175,9 +177,6 @@ email: user.email
 });
 }
 
-profile = snap.data();
-
-/* ADMIN CONTROL */
 const isAdmin = user.email === ADMIN_EMAIL;
 document.getElementById("admin").style.display = isAdmin ? "block" : "none";
 
@@ -187,7 +186,7 @@ loadScholarships();
 go("home");
 });
 
-/* ===== LOAD SCHOLARSHIPS ===== */
+/* ================= LOAD SCHOLARSHIPS ================= */
 window.loadScholarships = async () => {
 
 list.innerHTML = "";
@@ -209,16 +208,16 @@ list.innerHTML += `
 <p>${locked ? "🔒 Premium Locked" : s.desc}</p>
 <p class="small">${days} days left</p>
 
-${locked ?
-"<button disabled>Locked</button>" :
-`<a href="${s.link}" target="_blank"><button>Apply</button></a>`
+${locked 
+? "<button disabled>Locked</button>"
+: `<a href="${s.link}" target="_blank"><button>Apply</button></a>`
 }
 </div>
 `;
 });
 };
 
-/* ===== ADD SCHOLARSHIP (ADMIN ONLY) ===== */
+/* ================= ADD SCHOLARSHIP ================= */
 window.addScholarship = async () => {
 
 if (auth.currentUser.email !== ADMIN_EMAIL) {
@@ -237,16 +236,17 @@ type: type.value
 loadScholarships();
 };
 
-/* ===== PREMIUM UPGRADE ===== */
+/* ================= PAYFAST ================= */
 window.upgrade = () => {
 
 const form = document.createElement("form");
 form.method = "POST";
 form.action = "https://www.payfast.co.za/eng/process";
 
+/* SAFE TEST VALUES (WAITING FOR VERIFICATION OK) */
 const data = {
-merchant_id: "YOUR_ID",
-merchant_key: "YOUR_KEY",
+merchant_id: "10000100",
+merchant_key: "46f0cd694581a",
 amount: "50.00",
 item_name: "Premium Access",
 return_url: window.location.origin + "?paid=true",
@@ -254,25 +254,28 @@ cancel_url: window.location.origin
 };
 
 for (let k in data) {
-let i = document.createElement("input");
-i.type = "hidden";
-i.name = k;
-i.value = data[k];
-form.appendChild(i);
+let input = document.createElement("input");
+input.type = "hidden";
+input.name = k;
+input.value = data[k];
+form.appendChild(input);
 }
 
 document.body.appendChild(form);
 form.submit();
 };
 
-/* ===== PAYMENT SUCCESS ===== */
+/* ================= PAYMENT SUCCESS ================= */
 window.addEventListener("load", async () => {
+
 const url = new URLSearchParams(window.location.search);
 
 if (url.get("paid") === "true" && auth.currentUser) {
-await updateDoc(doc(db, "users", auth.currentUser.uid), {
-premium: true
-});
+
+await setDoc(doc(db, "users", auth.currentUser.uid), {
+premium: true,
+email: auth.currentUser.email
+}, { merge: true });
 
 alert("Premium Activated!");
 loadScholarships();
