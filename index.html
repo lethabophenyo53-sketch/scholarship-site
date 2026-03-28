@@ -163,6 +163,9 @@ padding:10px;
 </select>
 
 <button onclick="addScholarship()">Add Scholarship</button>
+<button onclick="runAutoSystem()" style="background:#10b981">
+⚡ Auto Generate Scholarships
+</button>
 <button onclick="autoRefresh()">Auto Refresh Feed</button>
 </div>
 
@@ -192,6 +195,8 @@ from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDocs, doc, getDoc, setDoc } 
 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+import { deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
 const firebaseConfig = {
 apiKey: "AIzaSyDB94Hy6sFUBXE4ObSOQmPW5As4Fbxaoi4",
 authDomain: "scholarship-platform-ec01f.firebaseapp.com",
@@ -209,6 +214,49 @@ const ADMIN_EMAIL = "lethabophenyo53@gmail.com";
 
 let profile = {premium:false, usage:0};
 
+  const AUTO_SCHOLARSHIPS = [
+{
+title: "AI & Robotics Future Leaders Grant",
+desc: "Funding for students in AI, robotics, and advanced computing fields.",
+type: "premium"
+},
+{
+title: "National STEM Excellence Award",
+desc: "Support for top-performing science and math students.",
+type: "free"
+},
+{
+title: "Global Business Innovation Scholarship",
+desc: "For students pursuing business, entrepreneurship, and finance.",
+type: "premium"
+},
+{
+title: "Community Development Education Fund",
+desc: "Supports students from underserved communities.",
+type: "free"
+},
+{
+title: "Engineering Future Talent Bursary",
+desc: "Full support for engineering students across all disciplines.",
+type: "free"
+},
+{
+title: "Private Corporate Leadership Programme",
+desc: "Exclusive leadership training and funding from private partners.",
+type: "premium"
+},
+{
+title: "Digital Skills Transformation Grant",
+desc: "Supports IT, coding, and digital literacy education.",
+type: "free"
+},
+{
+title: "Elite International Study Access",
+desc: "Opportunity for selected students to study abroad.",
+type: "premium"
+}
+];
+  
 const emailEl = document.getElementById("email");
 const passEl = document.getElementById("password");
 const listEl = document.getElementById("list");
@@ -229,6 +277,19 @@ await setDoc(doc(db,"users",u.uid),{email:u.email,premium:false,usage:0});
 window.login = ()=>signInWithEmailAndPassword(auth,emailEl.value,passEl.value);
 window.logout = ()=>signOut(auth);
 
+window.cleanOldScholarships = async () => {
+const snap = await getDocs(collection(db,"scholarships"));
+const now = Date.now();
+
+snap.forEach(async (docItem) => {
+const data = docItem.data();
+
+if (data.createdAt && now - data.createdAt > 7 * 24 * 60 * 60 * 1000) {
+await deleteDoc(doc(db,"scholarships",docItem.id));
+}
+});
+};
+  
 onAuthStateChanged(auth, async(user)=>{
 if(!user){go("auth");return;}
 
@@ -245,6 +306,8 @@ welcomeEl.innerText="Welcome "+user.email;
 loadScholarships();
 go("home");
 });
+
+autoDailyRefresh();
 
 window.loadScholarships = async ()=>{
 listEl.innerHTML="";
@@ -264,6 +327,30 @@ listEl.innerHTML+=`
 ${locked?`<button disabled>Locked</button>`:`<a href="${s.link}" target="_blank"><button>Apply</button></a>`}
 </div>`;
 });
+};
+
+  window.runAutoSystem = async () => {
+const today = new Date();
+
+for (let i = 0; i < AUTO_SCHOLARSHIPS.length; i++) {
+
+const s = AUTO_SCHOLARSHIPS[i];
+
+const deadline = new Date();
+deadline.setDate(today.getDate() + (20 + i * 3));
+
+await addDoc(collection(db, "scholarships"), {
+title: s.title,
+desc: s.desc,
+link: "https://example.com/apply",
+deadline: deadline.toISOString().split("T")[0],
+type: s.type,
+createdAt: Date.now()
+});
+}
+
+alert("Auto scholarships generated!");
+loadScholarships();
 };
 
 window.addScholarship = async ()=>{
