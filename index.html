@@ -4,29 +4,28 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Scholar Match PRO</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
-body{font-family:'Poppins',sans-serif;margin:0;background:#eef2ff}
+body{margin:0;font-family:Poppins;background:#eef2ff}
 .app{max-width:480px;margin:auto;background:#fff;min-height:100vh}
-.header{background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;padding:18px;text-align:center;font-weight:700}
-.content{padding:15px;padding-bottom:100px}
-.section{display:none}.active{display:block}
-.card{background:#fff;padding:14px;margin:10px 0;border-radius:12px;box-shadow:0 6px 15px rgba(0,0,0,0.08)}
-input,select{width:100%;padding:10px;margin:6px 0;border-radius:8px;border:1px solid #ddd}
-button{width:100%;padding:12px;border:none;border-radius:8px;background:#4f46e5;color:white;font-weight:600;margin-top:6px;cursor:pointer}
-.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:480px;display:flex;background:#fff}
+.header{padding:15px;background:#4f46e5;color:#fff;text-align:center;font-weight:700}
+.section{display:none;padding:15px}
+.active{display:block}
+.card{background:#fff;padding:12px;margin:10px 0;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.1)}
+input,select{width:100%;padding:10px;margin:5px 0;border:1px solid #ddd;border-radius:8px}
+button{width:100%;padding:10px;background:#4f46e5;color:white;border:none;border-radius:8px;margin-top:5px}
+.nav{position:fixed;bottom:0;width:100%;max-width:480px;display:flex;background:#fff}
 .nav button{flex:1;background:none;color:#4f46e5}
 .locked{opacity:0.5}
-.highlight{border:2px solid #4f46e5;background:#fafaff}
 </style>
 </head>
 
 <body>
-<div class="app">
-<div class="header">🚀 Scholar Match PRO</div>
 
-<div class="content">
+<div class="app">
+<div class="header">🎓 Scholar Match PRO</div>
 
 <!-- AUTH -->
 <div id="auth" class="section active">
@@ -40,35 +39,18 @@ button{width:100%;padding:12px;border:none;border-radius:8px;background:#4f46e5;
 <div id="home" class="section">
 <h3 id="welcome"></h3>
 
-<select id="profileLevel">
-<option>Primary School</option>
+<select id="level">
 <option>High School</option>
 <option>College</option>
 <option>University</option>
 </select>
-<button onclick="saveProfile()">Save Level</button>
 
-<div class="card highlight">
-<h3>💎 Premium Elite (R50)</h3>
-<p>🚀 Get ahead of everyone:</p>
-<ul style="padding-left:18px;">
-<li>⚡ Early access</li>
-<li>🎯 Smart recommendations</li>
-<li>⏳ Deadline alerts</li>
-<li>🔒 Hidden scholarships</li>
-</ul>
-<p id="status"></p>
-<button onclick="upgrade()">Upgrade Now</button>
-</div>
-
+<button onclick="saveLevel()">Save Level</button>
 <button onclick="logout()">Logout</button>
 </div>
 
-<!-- FUNDING -->
-<div id="funding" class="section">
-<div class="card" style="background:#fee2e2;">
-<p>⚠️ Scholarships closing soon — don’t miss out</p>
-</div>
+<!-- SCHOLARSHIPS -->
+<div id="scholarships" class="section">
 <h3>Scholarships</h3>
 <div id="list"></div>
 </div>
@@ -76,156 +58,170 @@ button{width:100%;padding:12px;border:none;border-radius:8px;background:#4f46e5;
 <!-- ADMIN -->
 <div id="admin" class="section">
 <h3>Admin Panel</h3>
+
 <input id="title" placeholder="Title">
 <input id="desc" placeholder="Description">
 <input id="link" placeholder="Link">
 <input id="deadline" type="date">
-<select id="level">
-<option>Primary School</option>
-<option>High School</option>
-<option>College</option>
-<option>University</option>
-<option>All</option>
-</select>
+
 <select id="type">
 <option value="free">Free</option>
 <option value="premium">Premium</option>
 </select>
-<button onclick="addScholarship()">Add</button>
+
+<button onclick="addScholarship()">Add Scholarship</button>
 <button onclick="autoGenerate()">Auto Generate</button>
-<button onclick="clearAll()">Clear All</button>
 </div>
 
 </div>
 
+<!-- NAV -->
 <div class="nav">
 <button onclick="go('home')">Home</button>
-<button onclick="go('funding')">Funding</button>
+<button onclick="go('scholarships')">Scholarships</button>
 <button onclick="go('admin')">Admin</button>
-</div>
-
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import {
+getAuth,
+createUserWithEmailAndPassword,
+signInWithEmailAndPassword,
+onAuthStateChanged,
+signOut
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+import {
+getFirestore,
+collection,
+addDoc,
+getDocs,
+doc,
+setDoc,
+getDoc,
+updateDoc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
-apiKey:"AIzaSyDB94Hy6sFUBXE4ObSOQmPW5As4Fbxaoi4",
-authDomain:"scholarship-platform-ec01f.firebaseapp.com",
-projectId:"scholarship-platform-ec01f"
+apiKey: "YOUR_API_KEY",
+authDomain: "YOUR_AUTH_DOMAIN",
+projectId: "YOUR_PROJECT_ID"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const adminEmail = "lethabophenyo53@gmail.com";
 let profile = null;
+let isAdmin = false;
 
+/* NAV */
 window.go = (id)=>{
 if(!auth.currentUser && id!=="auth") return go("auth");
-document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-document.getElementById(id).classList.add('active');
+document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
 }
 
+/* AUTH */
 window.signup = async ()=>{
 const u = await createUserWithEmailAndPassword(auth,email.value,password.value);
-await setDoc(doc(db,"profiles",u.user.uid),{level:"Primary School",premium:false,email:u.user.email});
+
+await setDoc(doc(db,"users",u.user.uid),{
+level:"High School",
+premium:false
+});
 }
 
-window.login = ()=> signInWithEmailAndPassword(auth,email.value,password.value);
-window.logout = ()=> signOut(auth);
+window.login = ()=>signInWithEmailAndPassword(auth,email.value,password.value);
+window.logout = ()=>signOut(auth);
 
+/* AUTH STATE */
 onAuthStateChanged(auth, async (u)=>{
-if(u){
-const snap = await getDoc(doc(db,"profiles",u.uid));
-profile = snap.data();
-welcome.innerText = "Welcome " + u.email;
-status.innerText = profile.premium ? "Premium User" : "Free User";
-if(u.email!==adminEmail) document.querySelector("button[onclick=\"go('admin')\"]").style.display="none";
-loadScholarships();
-go('home');
-}else{
-profile=null;
-welcome.innerText="";
-list.innerHTML="";
-go('auth');
+
+if(!u){
+go("auth");
+return;
 }
+
+const token = await u.getIdTokenResult();
+isAdmin = token.claims.admin === true;
+
+document.getElementById("admin").style.display = isAdmin ? "block":"none";
+
+const snap = await getDoc(doc(db,"users",u.uid));
+profile = snap.data();
+
+welcome.innerText = "Welcome " + u.email;
+
+go("home");
 });
 
-window.saveProfile = async ()=>{
-await updateDoc(doc(db,"profiles",auth.currentUser.uid),{level:profileLevel.value});
-profile.level = profileLevel.value;
-loadScholarships();
+/* SAVE LEVEL */
+window.saveLevel = async ()=>{
+await updateDoc(doc(db,"users",auth.currentUser.uid),{
+level:level.value
+});
 }
 
-function countdown(d){
-const diff=new Date(d)-new Date();
-return diff<=0?"Closed":Math.floor(diff/86400000)+" days left";
-}
+/* LOAD SCHOLARSHIPS */
+window.load = async ()=>{
+list.innerHTML = "";
 
-window.loadScholarships = async ()=>{
-list.innerHTML="";
 const snap = await getDocs(collection(db,"scholarships"));
-let arr=[];
-snap.forEach(d=>arr.push(d.data()));
-arr.sort((a,b)=>new Date(a.deadline)-new Date(b.deadline));
 
-arr.forEach(s=>{
-if(s.level!==profile.level && s.level!=="All") return;
-const locked = s.type==="premium" && !profile.premium;
+snap.forEach(d=>{
+const s = d.data();
+
+const locked = s.type==="premium" && !profile?.premium;
 
 list.innerHTML += `
 <div class="card ${locked?"locked":""}">
-<h4>${locked?"🔒 Premium Scholarship":s.title}</h4>
-<p>${locked?"Upgrade to unlock full details":s.desc}</p>
-<p>${countdown(s.deadline)}</p>
-${locked?"<button onclick='go(\"home\")'>Unlock</button>":`<a href="${s.link}" target="_blank">Apply</a>`}
+<h4>${s.title}</h4>
+<p>${locked?"Locked content":s.desc}</p>
+<p>${s.deadline}</p>
+${locked ? "<button>Locked</button>" :
+`<a href="${s.link}" target="_blank">Apply</a>`}
 </div>`;
 });
 }
 
+/* ADD SCHOLARSHIP (ADMIN ONLY) */
 window.addScholarship = async ()=>{
-if(auth.currentUser.email!==adminEmail) return alert("Not admin");
+if(!isAdmin) return alert("Not admin");
+
 await addDoc(collection(db,"scholarships"),{
 title:title.value,
 desc:desc.value,
 link:link.value,
 deadline:deadline.value,
-level:level.value,
 type:type.value
 });
+
 alert("Added");
-loadScholarships();
+load();
 }
 
+/* AUTO GENERATE */
 window.autoGenerate = async ()=>{
-if(auth.currentUser.email!==adminEmail) return;
-await clearAll();
-const data=[
-{title:"NSFAS 2027",desc:"Full funding",link:"https://nsfas.org.za",deadline:"2027-01-31",level:"University",type:"free"},
-{title:"Elite Bursary",desc:"Top students",link:"#",deadline:"2027-02-01",level:"High School",type:"premium"}
+if(!isAdmin) return;
+
+const data = [
+{title:"NSFAS Funding",desc:"Full funding",link:"#",deadline:"2027-01-01",type:"free"},
+{title:"Elite Bursary",desc:"Top students only",link:"#",deadline:"2027-02-01",type:"premium"}
 ];
-for(const i of data) await addDoc(collection(db,"scholarships"),i);
-loadScholarships();
+
+for(const s of data){
+await addDoc(collection(db,"scholarships"),s);
 }
 
-window.clearAll = async ()=>{
-const snap = await getDocs(collection(db,"scholarships"));
-for(const d of snap.docs) await deleteDoc(doc(db,"scholarships",d.id));
-loadScholarships();
+load();
 }
 
-window.upgrade = async ()=>{
-await updateDoc(doc(db,"profiles",auth.currentUser.uid),{premium:true});
-profile.premium=true;
-status.innerText="Premium User";
-loadScholarships();
-alert("Upgraded (simulation)");
-}
+/* LOAD ON START */
+setInterval(()=>{ if(profile) load(); },3000);
 
 </script>
+
 </body>
 </html>
