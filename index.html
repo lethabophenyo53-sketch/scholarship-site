@@ -51,7 +51,7 @@ display:flex;background:#0f172a;border-top:1px solid #333;
 
 <div class="app">
 
-<div class="header">🎓 SCHOLAR MATCH FINAL</div>
+<div class="header">🎓 SCHOLAR MATCH</div>
 
 <!-- AUTH -->
 <div id="auth" class="section active">
@@ -69,7 +69,7 @@ display:flex;background:#0f172a;border-top:1px solid #333;
 
 <div class="card">
 <h3>💎 Premium (R50)</h3>
-<p>Unlock premium scholarships + alerts</p>
+<p>Unlock premium scholarships</p>
 <button onclick="upgrade()">Upgrade</button>
 </div>
 </div>
@@ -94,8 +94,7 @@ display:flex;background:#0f172a;border-top:1px solid #333;
 <option value="premium">Premium</option>
 </select>
 
-<button onclick="addScholarship()">Add</button>
-<button onclick="aiGenerate()">AI Generate</button>
+<button onclick="addScholarship()">Add Scholarship</button>
 </div>
 
 </div>
@@ -128,35 +127,59 @@ setDoc,
 updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+/* ===== ADMIN EMAIL ===== */
+const ADMIN_EMAIL = "lethabophenyo53@gmail.com";
+
 let profile = null;
-let isAdmin = false;
 
-/* NAV SAFE */
-window.go = (page)=>{
-if(page!=="auth" && !auth.currentUser) return go("auth");
-
-document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-document.getElementById(page).classList.add("active");
+/* ===== NAVIGATION SAFE ===== */
+window.go = (page) => {
+if (!auth.currentUser) {
+page = "auth";
 }
 
-/* AUTH */
-window.signup = ()=>createUserWithEmailAndPassword(auth,email.value,password.value)
-.then(async(u)=>{
-await setDoc(doc(db,"users",u.user.uid),{premium:false});
+document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+document.getElementById(page).classList.add("active");
+};
+
+/* ===== AUTH ===== */
+window.signup = () =>
+createUserWithEmailAndPassword(auth, email.value, password.value)
+.then(async (u) => {
+await setDoc(doc(db, "users", u.user.uid), {
+premium: false,
+email: u.user.email
+});
 });
 
-window.login = ()=>signInWithEmailAndPassword(auth,email.value,password.value);
-window.logout = ()=>signOut(auth);
+window.login = () =>
+signInWithEmailAndPassword(auth, email.value, password.value);
 
-/* STATE */
-onAuthStateChanged(auth, async(user)=>{
+window.logout = () => signOut(auth);
 
-if(!user){go("auth");return;}
+/* ===== AUTH STATE FIX ===== */
+onAuthStateChanged(auth, async (user) => {
 
-const snap = await getDoc(doc(db,"users",user.uid));
+if (!user) {
+go("auth");
+return;
+}
+
+const ref = doc(db, "users", user.uid);
+const snap = await getDoc(ref);
+
+if (!snap.exists()) {
+await setDoc(ref, {
+premium: false,
+email: user.email
+});
+}
+
 profile = snap.data();
 
-isAdmin = user.email === "YOUR_ADMIN_EMAIL@gmail.com";
+/* ADMIN CONTROL */
+const isAdmin = user.email === ADMIN_EMAIL;
+document.getElementById("admin").style.display = isAdmin ? "block" : "none";
 
 welcome.innerText = "Welcome " + user.email;
 
@@ -164,98 +187,94 @@ loadScholarships();
 go("home");
 });
 
-/* LOAD */
-window.loadScholarships = async ()=>{
+/* ===== LOAD SCHOLARSHIPS ===== */
+window.loadScholarships = async () => {
 
-list.innerHTML="";
+list.innerHTML = "";
 
-const snap = await getDocs(collection(db,"scholarships"));
+const snap = await getDocs(collection(db, "scholarships"));
 
-snap.forEach(d=>{
-const s=d.data();
+snap.forEach(d => {
+const s = d.data();
 
-const locked = s.type==="premium" && !profile?.premium;
+const locked = s.type === "premium" && !profile?.premium;
 
-const days = Math.ceil((new Date(s.deadline)-new Date())/(1000*60*60*24));
+const days = Math.ceil(
+(new Date(s.deadline) - new Date()) / (1000 * 60 * 60 * 24)
+);
 
-list.innerHTML+=`
-<div class="card ${locked?'locked':''}">
+list.innerHTML += `
+<div class="card ${locked ? "locked" : ""}">
 <h4>${s.title}</h4>
-<p>${locked?'🔒 Premium Locked':s.desc}</p>
-<p class="small">⏳ ${days} days left</p>
+<p>${locked ? "🔒 Premium Locked" : s.desc}</p>
+<p class="small">${days} days left</p>
 
-${locked?
-"<button disabled>Locked</button>":
-`<a href="${s.link}" target="_blank"><button>Apply</button></a>`}
-</div>`;
+${locked ?
+"<button disabled>Locked</button>" :
+`<a href="${s.link}" target="_blank"><button>Apply</button></a>`
+}
+</div>
+`;
 });
-}
-
-/* ADMIN */
-window.addScholarship = async ()=>{
-if(!isAdmin) return alert("No access");
-
-await addDoc(collection(db,"scholarships"),{
-title:title.value,
-desc:desc.value,
-link:link.value,
-deadline:deadline.value,
-type:type.value
-});
-
-loadScholarships();
-}
-
-/* AI */
-window.aiGenerate = async ()=>{
-if(!isAdmin) return;
-
-const data=[
-{title:"NSFAS Funding",desc:"Full funding",link:"#",deadline:"2026-12-01",type:"free"},
-{title:"Tech Global Scholarship",desc:"AI studies",link:"#",deadline:"2026-10-01",type:"premium"}
-];
-
-for(let s of data){
-await addDoc(collection(db,"scholarships"),s);
-}
-
-loadScholarships();
-}
-
-/* UPGRADE */
-window.upgrade = ()=>{
-const f=document.createElement("form");
-f.method="POST";
-f.action="https://www.payfast.co.za/eng/process";
-
-const data={
-merchant_id:"YOUR_ID",
-merchant_key:"YOUR_KEY",
-amount:"50.00",
-item_name:"Premium",
-return_url:window.location.href+"?paid=true",
-cancel_url:window.location.href
 };
 
-for(let k in data){
-let i=document.createElement("input");
-i.name=k;i.value=data[k];i.type="hidden";
-f.appendChild(i);
+/* ===== ADD SCHOLARSHIP (ADMIN ONLY) ===== */
+window.addScholarship = async () => {
+
+if (auth.currentUser.email !== ADMIN_EMAIL) {
+alert("No access");
+return;
 }
 
-document.body.appendChild(f);
-f.submit();
-}
-
-/* PAYMENT */
-window.addEventListener("load",async()=>{
-const url=new URLSearchParams(window.location.search);
-
-if(url.get("paid")==="true" && auth.currentUser){
-await updateDoc(doc(db,"users",auth.currentUser.uid),{
-premium:true
+await addDoc(collection(db, "scholarships"), {
+title: title.value,
+desc: desc.value,
+link: link.value,
+deadline: deadline.value,
+type: type.value
 });
-alert("Premium Activated");
+
+loadScholarships();
+};
+
+/* ===== PREMIUM UPGRADE ===== */
+window.upgrade = () => {
+
+const form = document.createElement("form");
+form.method = "POST";
+form.action = "https://www.payfast.co.za/eng/process";
+
+const data = {
+merchant_id: "YOUR_ID",
+merchant_key: "YOUR_KEY",
+amount: "50.00",
+item_name: "Premium Access",
+return_url: window.location.origin + "?paid=true",
+cancel_url: window.location.origin
+};
+
+for (let k in data) {
+let i = document.createElement("input");
+i.type = "hidden";
+i.name = k;
+i.value = data[k];
+form.appendChild(i);
+}
+
+document.body.appendChild(form);
+form.submit();
+};
+
+/* ===== PAYMENT SUCCESS ===== */
+window.addEventListener("load", async () => {
+const url = new URLSearchParams(window.location.search);
+
+if (url.get("paid") === "true" && auth.currentUser) {
+await updateDoc(doc(db, "users", auth.currentUser.uid), {
+premium: true
+});
+
+alert("Premium Activated!");
 loadScholarships();
 }
 });
