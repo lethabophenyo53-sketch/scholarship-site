@@ -3,16 +3,21 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Scholar Match PRO</title>
+<title>Student Success</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:Poppins}
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Poppins;
+}
 
 body{
 background:#0b1220;
-color:#fff;
+color:white;
 display:flex;
 justify-content:center;
 }
@@ -23,19 +28,23 @@ max-width:520px;
 min-height:100vh;
 background:#111827;
 padding-bottom:80px;
-display:flex;
-flex-direction:column;
 }
 
 .header{
 padding:18px;
 text-align:center;
 font-weight:700;
-background:linear-gradient(135deg,#6366f1,#a855f7);
+background:linear-gradient(135deg,#2563eb,#7c3aed);
 }
 
-.section{display:none;padding:15px}
-.active{display:block}
+.section{
+display:none;
+padding:15px;
+}
+
+.active{
+display:block;
+}
 
 .card{
 background:#1f2937;
@@ -44,24 +53,27 @@ margin:10px 0;
 border-radius:14px;
 }
 
-input,select{
-width:100%;
-padding:10px;
-margin:6px 0;
-border-radius:8px;
-border:none;
-}
-
 button{
 width:100%;
 padding:10px;
 border:none;
 border-radius:8px;
 margin-top:6px;
-background:#6366f1;
+background:#2563eb;
 color:white;
 font-weight:600;
 cursor:pointer;
+}
+
+input, select{
+width:100%;
+padding:10px;
+margin-top:6px;
+border-radius:8px;
+border:none;
+outline:none;
+background:#0f172a;
+color:white;
 }
 
 .nav{
@@ -78,38 +90,16 @@ width:100%;
 max-width:520px;
 display:flex;
 background:#0f172a;
-border-top:1px solid #333;
+border-top:1px solid #222;
 }
 
 .nav-inner button{
 flex:1;
 background:none;
 border:none;
-color:white;
 padding:12px;
+color:white;
 }
-
-.locked{opacity:0.4;filter:blur(1px)}
-.small{font-size:12px;opacity:0.7}
-
-#admin{display:none}
-
-/* AI CHAT */
-#aiBox{
-position:fixed;
-bottom:80px;
-right:10px;
-width:90%;
-max-width:320px;
-background:#0f172a;
-border:1px solid #333;
-border-radius:12px;
-display:none;
-flex-direction:column;
-padding:10px;
-}
-#chatLog{height:200px;overflow:auto;font-size:12px;margin-bottom:8px}
-.aiMsg{margin:5px 0}
 </style>
 </head>
 
@@ -117,56 +107,58 @@ padding:10px;
 
 <div class="app">
 
-<div class="header">🎓 SCHOLAR MATCH PRO</div>
-
-<!-- AUTH -->
-<div id="auth" class="section active">
-<h3>Login / Signup</h3>
-<input id="email" placeholder="Email">
-<input id="password" type="password" placeholder="Password">
-<button onclick="signup()">Sign Up</button>
-<button onclick="login()">Login</button>
-</div>
+<div class="header">🎓 Student Success</div>
 
 <!-- HOME -->
-<div id="home" class="section">
-<h3 id="welcome"></h3>
+<div id="home" class="section active">
+<h3>Welcome 👋</h3>
 
 <div class="card">
-<h3>💎 Premium Access (R50)</h3>
-<p>Unlock exclusive scholarships + AI features</p>
-<button onclick="upgrade()">Upgrade</button>
+<p>📚 Past Papers (Grade 1–12)</p>
+<p>🎓 Scholarships</p>
+<p>📈 Study Resources</p>
 </div>
-
-<button onclick="toggleAI()">Ask AI Assistant</button>
-<button onclick="logout()">Logout</button>
 </div>
 
 <!-- SCHOLARSHIPS -->
 <div id="scholarships" class="section">
-<h3>Scholarships</h3>
-<div id="list"></div>
+<h3>🎓 Scholarships</h3>
+<div id="schList"></div>
+</div>
+
+<!-- PAST PAPERS -->
+<div id="papers" class="section">
+<h3>📚 Past Papers</h3>
+
+<select id="gradeFilter" onchange="loadPapers()">
+<option value="all">All Grades</option>
+<option value="1-3">Grade 1–3</option>
+<option value="4-6">Grade 4–6</option>
+<option value="7-9">Grade 7–9</option>
+<option value="10">Grade 10</option>
+<option value="11">Grade 11</option>
+<option value="12">Grade 12</option>
+</select>
+
+<div id="paperList"></div>
 </div>
 
 <!-- ADMIN -->
 <div id="admin" class="section">
-<h3>Admin Panel</h3>
+<h3>Admin Panel 🔐</h3>
 
-<input id="title" placeholder="Title">
-<input id="desc" placeholder="Description">
-<input id="link" placeholder="Link">
-<input id="deadline" type="date">
+<input id="title" placeholder="Paper Title">
+<input id="grade" placeholder="Grade (e.g. 12)">
+<input id="link" placeholder="Download Link">
 
-<select id="type">
-<option value="free">Free</option>
-<option value="premium">Premium</option>
-</select>
+<button onclick="addPaper()">Upload Paper</button>
+
+<hr style="margin:15px 0;opacity:0.2"/>
+
+<input id="sTitle" placeholder="Scholarship Title">
+<input id="sDesc" placeholder="Description">
 
 <button onclick="addScholarship()">Add Scholarship</button>
-<button onclick="runAutoSystem()" style="background:#10b981">
-⚡ Auto Generate Scholarships
-</button>
-<button onclick="autoRefresh()">Auto Refresh Feed</button>
 </div>
 
 </div>
@@ -175,279 +167,111 @@ padding:10px;
 <div class="nav">
 <div class="nav-inner">
 <button onclick="go('home')">Home</button>
-<button onclick="go('scholarships')">List</button>
+<button onclick="go('scholarships')">Scholarships</button>
+<button onclick="go('papers')">Papers</button>
 <button onclick="go('admin')">Admin</button>
 </div>
 </div>
 
-<!-- AI BOX -->
-<div id="aiBox">
-<div id="chatLog"></div>
-<input id="aiInput" placeholder="Ask something...">
-<button onclick="sendAI()">Send</button>
-</div>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } 
-from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-import { getFirestore, collection, addDoc, getDocs, doc, getDoc, setDoc } 
+import { getFirestore, collection, addDoc, getDocs } 
 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-import { deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
+/* 🔥 YOUR FIREBASE CONFIG */
 const firebaseConfig = {
-apiKey: "AIzaSyDB94Hy6sFUBXE4ObSOQmPW5As4Fbxaoi4",
-authDomain: "scholarship-platform-ec01f.firebaseapp.com",
-projectId: "scholarship-platform-ec01f",
-storageBucket: "scholarship-platform-ec01f.firebasestorage.app",
-messagingSenderId: "807575045909",
-appId: "1:807575045909:web:9a61a548638423d7988b1c"
+apiKey: "YOUR_API_KEY",
+authDomain: "YOUR_AUTH_DOMAIN",
+projectId: "YOUR_PROJECT_ID"
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 const db = getFirestore(app);
 
-const ADMIN_EMAIL = "lethabophenyo53@gmail.com";
-
-let profile = {premium:false, usage:0};
-
-  const AUTO_SCHOLARSHIPS = [
-{
-title: "AI & Robotics Future Leaders Grant",
-desc: "Funding for students in AI, robotics, and advanced computing fields.",
-type: "premium"
-},
-{
-title: "National STEM Excellence Award",
-desc: "Support for top-performing science and math students.",
-type: "free"
-},
-{
-title: "Global Business Innovation Scholarship",
-desc: "For students pursuing business, entrepreneurship, and finance.",
-type: "premium"
-},
-{
-title: "Community Development Education Fund",
-desc: "Supports students from underserved communities.",
-type: "free"
-},
-{
-title: "Engineering Future Talent Bursary",
-desc: "Full support for engineering students across all disciplines.",
-type: "free"
-},
-{
-title: "Private Corporate Leadership Programme",
-desc: "Exclusive leadership training and funding from private partners.",
-type: "premium"
-},
-{
-title: "Digital Skills Transformation Grant",
-desc: "Supports IT, coding, and digital literacy education.",
-type: "free"
-},
-{
-title: "Elite International Study Access",
-desc: "Opportunity for selected students to study abroad.",
-type: "premium"
-}
-];
-  
-const emailEl = document.getElementById("email");
-const passEl = document.getElementById("password");
-const listEl = document.getElementById("list");
-const welcomeEl = document.getElementById("welcome");
-
+/* NAV */
 window.go = (page)=>{
-if(!auth.currentUser) page="auth";
 document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
 document.getElementById(page).classList.add("active");
 };
 
-window.signup = async ()=>{
-await createUserWithEmailAndPassword(auth,emailEl.value,passEl.value);
-const u = auth.currentUser;
-await setDoc(doc(db,"users",u.uid),{email:u.email,premium:false,usage:0});
-};
+/* ---------------- PAPERS ---------------- */
 
-window.login = ()=>signInWithEmailAndPassword(auth,emailEl.value,passEl.value);
-window.logout = ()=>signOut(auth);
-
-window.cleanOldScholarships = async () => {
-const snap = await getDocs(collection(db,"scholarships"));
-const now = Date.now();
-
-snap.forEach(async (docItem) => {
-const data = docItem.data();
-
-if (data.createdAt && now - data.createdAt > 7 * 24 * 60 * 60 * 1000) {
-await deleteDoc(doc(db,"scholarships",docItem.id));
-}
-});
-};
-  
-onAuthStateChanged(auth, async(user)=>{
-if(!user){go("auth");return;}
-
-const ref = doc(db,"users",user.uid);
-const snap = await getDoc(ref);
-const urlParams = new URLSearchParams(window.location.search);
-
-if (urlParams.get("paid") === "true") {
-  await setDoc(ref, { premium: true }, { merge: true });
-  alert("🎉 Premium Activated!");
-  profile.premium = true;
-}
-
-profile = snap.exists()?snap.data():{premium:false,usage:0};
-
-const snap = await getDoc(ref);
-
-profile = snap.exists()
-  ? snap.data()
-  : { premium: false, usage: 0 };
-
-// create user ONLY if not exists
-if (!snap.exists()) {
-  await setDoc(ref, {
-    email: user.email,
-    premium: false,
-    usage: 0
-  });
-}
-  
-document.getElementById("admin").style.display =
-user.uid === "lethabophenyo53@gmail.com" ? "block" : "none";
-
-loadScholarships();
-go("home");
+window.addPaper = async ()=>{
+await addDoc(collection(db,"papers"),{
+title: title.value,
+grade: grade.value,
+link: link.value
 });
 
-autoDailyRefresh();
+alert("Paper uploaded!");
+loadPapers();
+};
 
-window.loadScholarships = async ()=>{
-listEl.innerHTML="";
-const snap = await getDocs(collection(db,"scholarships"));
+window.loadPapers = async ()=>{
+const snap = await getDocs(collection(db,"papers"));
+const el = document.getElementById("paperList");
+const filter = document.getElementById("gradeFilter").value;
 
-snap.forEach(d=>{
-const s=d.data();
-const locked = s.type==="premium" && !profile.premium;
+el.innerHTML="";
 
-const days = s.deadline?Math.max(0,Math.ceil((new Date(s.deadline)-new Date())/86400000)):"-";
+snap.forEach(doc=>{
+const p = doc.data();
 
-listEl.innerHTML+=`
-<div class="card ${locked?'locked':''}">
-<h4>${s.title}</h4>
-<p>${locked?"🔒 Premium Only":s.desc}</p>
-<p class="small">${days} days left</p>
-${locked?`<button disabled>Locked</button>`:`<a href="${s.link}" target="_blank"><button>Apply</button></a>`}
-</div>`;
+if(filter !== "all"){
+if(filter === "1-3" && !(p.grade<=3)) return;
+if(filter === "4-6" && !(p.grade>=4 && p.grade<=6)) return;
+if(filter === "7-9" && !(p.grade>=7 && p.grade<=9)) return;
+if(filter === "10" && p.grade!="10") return;
+if(filter === "11" && p.grade!="11") return;
+if(filter === "12" && p.grade!="12") return;
+}
+
+el.innerHTML += `
+<div class="card">
+<h4>${p.title}</h4>
+<p>Grade ${p.grade}</p>
+<a href="${p.link}" target="_blank">
+<button>Download</button>
+</a>
+</div>
+`;
 });
 };
 
-  window.runAutoSystem = async () => {
-const today = new Date();
-
-for (let i = 0; i < AUTO_SCHOLARSHIPS.length; i++) {
-
-const s = AUTO_SCHOLARSHIPS[i];
-
-const deadline = new Date();
-deadline.setDate(today.getDate() + (20 + i * 3));
-
-await addDoc(collection(db, "scholarships"), {
-title: s.title,
-desc: s.desc,
-link: "https://example.com/apply",
-deadline: deadline.toISOString().split("T")[0],
-type: s.type,
-createdAt: Date.now()
-});
-}
-
-alert("Auto scholarships generated!");
-loadScholarships();
-};
+/* ---------------- SCHOLARSHIPS ---------------- */
 
 window.addScholarship = async ()=>{
-if(auth.currentUser.email!==ADMIN_EMAIL) return;
 await addDoc(collection(db,"scholarships"),{
-title:title.value,
-desc:desc.value,
-link:link.value,
-deadline:deadline.value,
-type:type.value
+title: sTitle.value,
+desc: sDesc.value
 });
+
+alert("Scholarship added!");
 loadScholarships();
 };
 
-window.autoRefresh = async ()=>{
+window.loadScholarships = async ()=>{
 const snap = await getDocs(collection(db,"scholarships"));
-snap.forEach(()=>{});
-alert("Feed synced");
-};
+const el = document.getElementById("schList");
 
-  window.cleanOldScholarships = async () => {
-const snap = await getDocs(collection(db,"scholarships"));
-const now = Date.now();
+el.innerHTML="";
 
-snap.forEach(async (docItem) => {
-const data = docItem.data();
+snap.forEach(doc=>{
+const s = doc.data();
 
-if (data.createdAt && now - data.createdAt > 7 * 24 * 60 * 60 * 1000) {
-await deleteDoc(doc(db,"scholarships",docItem.id));
-}
+el.innerHTML += `
+<div class="card">
+<h4>${s.title}</h4>
+<p>${s.desc}</p>
+</div>
+`;
 });
 };
 
-window.upgrade = ()=>{
-const f=document.createElement("form");
-f.method="POST";
-f.action="https://www.payfast.co.za/eng/process";
+/* INIT */
+loadScholarships();
+loadPapers();
 
-const data={
-merchant_id:"REPLACE_ME",
-merchant_key:"REPLACE_ME",
-amount:"50.00",
-item_name:"Premium Access",
-return_url:window.location.origin+"?paid=true",
-cancel_url:window.location.origin
-};
-
-Object.keys(data).forEach(k=>{
-const i=document.createElement("input");
-i.type="hidden";i.name=k;i.value=data[k];
-f.appendChild(i);
-});
-
-document.body.appendChild(f);
-f.submit();
-};
-
-window.toggleAI = ()=>{
-const box=document.getElementById("aiBox");
-box.style.display=box.style.display==="flex"?"none":"flex";
-};
-
-window.sendAI = ()=>{
-const input=document.getElementById("aiInput");
-const log=document.getElementById("chatLog");
-
-if(profile.usage>=3 && !profile.premium){
-log.innerHTML+="<div class='aiMsg'>Upgrade required for more AI usage</div>";
-return;
-}
-
-profile.usage++;
-
-log.innerHTML+=`<div class='aiMsg'>You: ${input.value}</div>`;
-log.innerHTML+=`<div class='aiMsg'>AI: Focus on scholarships, deadlines, and applications. Keep applying daily.</div>`;
-input.value="";
-};
 </script>
 
 </body>
