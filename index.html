@@ -8,11 +8,25 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
-body{margin:0;font-family:Poppins;background:#0b1220;color:#fff}
-.app{max-width:500px;margin:auto;background:#111827;min-height:100vh;padding-bottom:70px}
+body{
+margin:0;
+font-family:Poppins;
+background:#0b1220;
+color:#fff;
+}
+
+.app{
+max-width:500px;
+margin:auto;
+background:#111827;
+min-height:100vh;
+padding-bottom:70px;
+}
 
 .header{
-padding:18px;text-align:center;font-weight:700;
+padding:18px;
+text-align:center;
+font-weight:700;
 background:linear-gradient(135deg,#6366f1,#a855f7);
 }
 
@@ -27,23 +41,52 @@ border-radius:14px;
 }
 
 input,select{
-width:100%;padding:10px;margin:6px 0;border-radius:8px;border:none;
+width:100%;
+padding:10px;
+margin:6px 0;
+border-radius:8px;
+border:none;
 }
 
 button{
-width:100%;padding:10px;border:none;border-radius:8px;
-margin-top:6px;background:#6366f1;color:white;font-weight:600;
+width:100%;
+padding:10px;
+border:none;
+border-radius:8px;
+margin-top:6px;
+background:#6366f1;
+color:white;
+font-weight:600;
+cursor:pointer;
 }
 
 .nav{
-position:fixed;bottom:0;width:100%;max-width:500px;
-display:flex;background:#0f172a;border-top:1px solid #333;
+position:fixed;
+bottom:0;
+width:100%;
+max-width:500px;
+display:flex;
+background:#0f172a;
+border-top:1px solid #333;
 }
 
-.nav button{flex:1;background:none;border:none;color:white;padding:12px}
+.nav button{
+flex:1;
+background:none;
+border:none;
+color:white;
+padding:12px;
+}
 
-.locked{opacity:0.3;filter:blur(2px)}
-.small{font-size:12px;opacity:0.7}
+.locked{
+opacity:0.3;
+filter:blur(2px);
+}
+
+.small{
+font-size:12px;
+opacity:0.7;
+}
 
 #admin{display:none;}
 </style>
@@ -110,14 +153,31 @@ display:flex;background:#0f172a;border-top:1px solid #333;
 
 <script type="module">
 
-/* ================= FIREBASE INIT ================= */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } 
+/* ================= FIREBASE ================= */
+import { initializeApp } 
+from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+
+import { 
+getAuth,
+createUserWithEmailAndPassword,
+signInWithEmailAndPassword,
+onAuthStateChanged,
+signOut
+} 
 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-import { getFirestore, collection, addDoc, getDocs, doc, getDoc, setDoc } 
+import {
+getFirestore,
+collection,
+addDoc,
+getDocs,
+doc,
+getDoc,
+setDoc
+}
 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+/* 🔴 YOUR FIREBASE CONFIG (REPLACE IF NEEDED) */
 const firebaseConfig = {
 apiKey: "YOUR_API_KEY",
 authDomain: "YOUR_AUTH_DOMAIN",
@@ -131,7 +191,7 @@ const db = getFirestore(app);
 /* ================= ADMIN ================= */
 const ADMIN_EMAIL = "lethabophenyo53@gmail.com";
 
-let profile = null;
+let profile = { premium: false };
 
 /* ================= NAV ================= */
 window.go = (page) => {
@@ -142,17 +202,19 @@ document.getElementById(page).classList.add("active");
 };
 
 /* ================= AUTH ================= */
-window.signup = () =>
+window.signup = () => {
 createUserWithEmailAndPassword(auth, email.value, password.value)
 .then(async (u) => {
 await setDoc(doc(db, "users", u.user.uid), {
-premium: false,
-email: u.user.email
+email: u.user.email,
+premium: false
 });
 });
+};
 
-window.login = () =>
+window.login = () => {
 signInWithEmailAndPassword(auth, email.value, password.value);
+};
 
 window.logout = () => signOut(auth);
 
@@ -167,13 +229,13 @@ return;
 const ref = doc(db, "users", user.uid);
 const snap = await getDoc(ref);
 
-/* FIX: safe fallback */
+/* safe fallback */
 profile = snap.exists() ? snap.data() : { premium: false };
 
 if (!snap.exists()) {
 await setDoc(ref, {
-premium: false,
-email: user.email
+email: user.email,
+premium: false
 });
 }
 
@@ -194,8 +256,8 @@ list.innerHTML = "";
 const snap = await getDocs(collection(db, "scholarships"));
 
 snap.forEach(d => {
-const s = d.data();
 
+const s = d.data();
 const locked = s.type === "premium" && !profile?.premium;
 
 const days = Math.ceil(
@@ -243,7 +305,6 @@ const form = document.createElement("form");
 form.method = "POST";
 form.action = "https://www.payfast.co.za/eng/process";
 
-/* SAFE TEST VALUES (WAITING FOR VERIFICATION OK) */
 const data = {
 merchant_id: "10000100",
 merchant_key: "46f0cd694581a",
@@ -253,11 +314,11 @@ return_url: window.location.origin + "?paid=true",
 cancel_url: window.location.origin
 };
 
-for (let k in data) {
-let input = document.createElement("input");
+for (let key in data) {
+const input = document.createElement("input");
 input.type = "hidden";
-input.name = k;
-input.value = data[k];
+input.name = key;
+input.value = data[key];
 form.appendChild(input);
 }
 
