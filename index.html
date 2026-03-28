@@ -1,19 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Student Success</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Poppins;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Poppins}
 
 body{
 background:#0b1220;
@@ -33,59 +28,40 @@ padding-bottom:80px;
 .header{
 padding:18px;
 text-align:center;
+font-size:20px;
 font-weight:700;
 background:linear-gradient(135deg,#2563eb,#7c3aed);
 }
 
-.section{
-display:none;
-padding:15px;
-}
-
-.active{
-display:block;
-}
+.section{display:none;padding:15px}
+.active{display:block}
 
 .card{
 background:#1f2937;
 padding:14px;
+border-radius:12px;
 margin:10px 0;
-border-radius:14px;
 }
 
 button{
 width:100%;
 padding:10px;
+margin-top:8px;
 border:none;
 border-radius:8px;
-margin-top:6px;
 background:#2563eb;
 color:white;
 font-weight:600;
-cursor:pointer;
 }
 
-input, select{
-width:100%;
-padding:10px;
-margin-top:6px;
-border-radius:8px;
-border:none;
-outline:none;
-background:#0f172a;
-color:white;
+.locked{
+opacity:0.5;
+filter:blur(1px);
 }
 
 .nav{
 position:fixed;
 bottom:0;
-left:0;
-right:0;
-display:flex;
-justify-content:center;
-}
-
-.nav-inner{
 width:100%;
 max-width:520px;
 display:flex;
@@ -93,7 +69,7 @@ background:#0f172a;
 border-top:1px solid #222;
 }
 
-.nav-inner button{
+.nav button{
 flex:1;
 background:none;
 border:none;
@@ -111,19 +87,25 @@ color:white;
 
 <!-- HOME -->
 <div id="home" class="section active">
+<div class="card">
 <h3>Welcome 👋</h3>
+<p>All students. All grades. All university levels.</p>
+</div>
+
+<div class="card locked">
+<h4>📚 Past Papers (Locked Preview)</h4>
+<p>Unlock with Premium or Pay-per-paper</p>
+</div>
 
 <div class="card">
-<p>📚 Past Papers (Grade 1–12)</p>
-<p>🎓 Scholarships</p>
-<p>📈 Study Resources</p>
-</div>
+<h4>🎓 Scholarships</h4>
+<p>Free + Premium application tools</p>
 </div>
 
-<!-- SCHOLARSHIPS -->
-<div id="scholarships" class="section">
-<h3>🎓 Scholarships</h3>
-<div id="schList"></div>
+<div class="card">
+<h4>🤖 AI Study Help</h4>
+<p>Ask questions, get help instantly</p>
+</div>
 </div>
 
 <!-- PAST PAPERS -->
@@ -131,123 +113,149 @@ color:white;
 <h3>📚 Past Papers</h3>
 
 <select id="gradeFilter" onchange="loadPapers()">
-<option value="all">All Grades</option>
-<option value="1-3">Grade 1–3</option>
-<option value="4-6">Grade 4–6</option>
-<option value="7-9">Grade 7–9</option>
-<option value="10">Grade 10</option>
-<option value="11">Grade 11</option>
-<option value="12">Grade 12</option>
+<option value="all">All</option>
+<option value="school">School</option>
+<option value="university">University</option>
 </select>
 
 <div id="paperList"></div>
+</div>
+
+<!-- SCHOLARSHIPS -->
+<div id="scholarships" class="section">
+<h3>🎓 Scholarships</h3>
+
+<select id="schFilter" onchange="loadScholarships()">
+<option value="all">All</option>
+<option value="school">School</option>
+<option value="university">University</option>
+</select>
+
+<div id="schList"></div>
+</div>
+
+<!-- PREMIUM -->
+<div id="premium" class="section">
+<h3>💎 Premium Plans</h3>
+
+<div class="card">
+<h4>R20 per Paper</h4>
+<p>Unlock one past paper</p>
+<button>Buy Paper Access</button>
+</div>
+
+<div class="card">
+<h4>R50 / month</h4>
+<p>Unlimited past papers</p>
+<button>Subscribe Monthly</button>
+</div>
+
+<div class="card">
+<h4>R150 Once-off</h4>
+<p>Full access (BEST VALUE)</p>
+<button>Get Full Access</button>
+</div>
 </div>
 
 <!-- ADMIN -->
 <div id="admin" class="section">
 <h3>Admin Panel 🔐</h3>
 
-<input id="title" placeholder="Paper Title">
-<input id="grade" placeholder="Grade (e.g. 12)">
-<input id="link" placeholder="Download Link">
+<input id="emailCheck" placeholder="Enter Admin Email">
+<button onclick="checkAdmin()">Login</button>
 
+<div id="adminPanel" style="display:none;margin-top:10px">
+
+<input id="title" placeholder="Paper Title">
+<input id="level" placeholder="school / university">
+<input id="link" placeholder="Download Link">
 <button onclick="addPaper()">Upload Paper</button>
 
-<hr style="margin:15px 0;opacity:0.2"/>
+<hr style="margin:10px 0">
 
-<input id="sTitle" placeholder="Scholarship Title">
-<input id="sDesc" placeholder="Description">
-
+<input id="stitle" placeholder="Scholarship Title">
+<input id="slevel" placeholder="school / university">
 <button onclick="addScholarship()">Add Scholarship</button>
+
+</div>
 </div>
 
 </div>
 
 <!-- NAV -->
 <div class="nav">
-<div class="nav-inner">
 <button onclick="go('home')">Home</button>
-<button onclick="go('scholarships')">Scholarships</button>
 <button onclick="go('papers')">Papers</button>
+<button onclick="go('scholarships')">Scholarships</button>
+<button onclick="go('premium')">Premium</button>
 <button onclick="go('admin')">Admin</button>
-</div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs } 
-from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-/* 🔥 YOUR FIREBASE CONFIG */
 const firebaseConfig = {
-apiKey: "YOUR_API_KEY",
-authDomain: "YOUR_AUTH_DOMAIN",
-projectId: "YOUR_PROJECT_ID"
+apiKey: "YOUR_KEY",
+authDomain: "YOUR_DOMAIN",
+projectId: "YOUR_ID"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* NAV */
-window.go = (page)=>{
+const ADMIN_EMAIL = "admin@student.com";
+
+window.go = (p)=>{
 document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-document.getElementById(page).classList.add("active");
+document.getElementById(p).classList.add("active");
 };
 
-/* ---------------- PAPERS ---------------- */
+/* ADMIN */
+window.checkAdmin = ()=>{
+if(emailCheck.value === ADMIN_EMAIL){
+document.getElementById("adminPanel").style.display="block";
+alert("Admin logged in");
+}else{
+alert("Not allowed");
+}
+};
 
+/* PAPERS */
 window.addPaper = async ()=>{
 await addDoc(collection(db,"papers"),{
-title: title.value,
-grade: grade.value,
-link: link.value
+title:title.value,
+level:level.value,
+link:link.value
 });
-
-alert("Paper uploaded!");
-loadPapers();
+alert("Uploaded");
 };
 
 window.loadPapers = async ()=>{
 const snap = await getDocs(collection(db,"papers"));
 const el = document.getElementById("paperList");
-const filter = document.getElementById("gradeFilter").value;
 
 el.innerHTML="";
 
-snap.forEach(doc=>{
-const p = doc.data();
-
-if(filter !== "all"){
-if(filter === "1-3" && !(p.grade<=3)) return;
-if(filter === "4-6" && !(p.grade>=4 && p.grade<=6)) return;
-if(filter === "7-9" && !(p.grade>=7 && p.grade<=9)) return;
-if(filter === "10" && p.grade!="10") return;
-if(filter === "11" && p.grade!="11") return;
-if(filter === "12" && p.grade!="12") return;
-}
+snap.forEach(d=>{
+const p = d.data();
 
 el.innerHTML += `
 <div class="card">
 <h4>${p.title}</h4>
-<p>Grade ${p.grade}</p>
-<a href="${p.link}" target="_blank">
-<button>Download</button>
-</a>
-</div>
-`;
+<p>${p.level}</p>
+<button onclick="alert('Premium required')">Unlock</button>
+</div>`;
 });
 };
 
-/* ---------------- SCHOLARSHIPS ---------------- */
-
+/* SCHOLARSHIPS */
 window.addScholarship = async ()=>{
 await addDoc(collection(db,"scholarships"),{
-title: sTitle.value,
-desc: sDesc.value
+title:stitle.value,
+level:slevel.value
 });
-
-alert("Scholarship added!");
-loadScholarships();
+alert("Added");
 };
 
 window.loadScholarships = async ()=>{
@@ -256,21 +264,19 @@ const el = document.getElementById("schList");
 
 el.innerHTML="";
 
-snap.forEach(doc=>{
-const s = doc.data();
+snap.forEach(d=>{
+const s = d.data();
 
 el.innerHTML += `
 <div class="card">
 <h4>${s.title}</h4>
-<p>${s.desc}</p>
-</div>
-`;
+<p>${s.level}</p>
+</div>`;
 });
 };
 
-/* INIT */
-loadScholarships();
 loadPapers();
+loadScholarships();
 
 </script>
 
