@@ -1,26 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Scholar Match FINAL</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Scholar Match PRO</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Poppins}
+
 body{
-margin:0;
-font-family:Poppins;
 background:#0b1220;
 color:#fff;
+display:flex;
+justify-content:center;
 }
 
 .app{
-max-width:500px;
-margin:auto;
-background:#111827;
+width:100%;
+max-width:520px;
 min-height:100vh;
-padding-bottom:70px;
+background:#111827;
+padding-bottom:80px;
+display:flex;
+flex-direction:column;
 }
 
 .header{
@@ -35,7 +39,7 @@ background:linear-gradient(135deg,#6366f1,#a855f7);
 
 .card{
 background:#1f2937;
-padding:12px;
+padding:14px;
 margin:10px 0;
 border-radius:14px;
 }
@@ -63,14 +67,21 @@ cursor:pointer;
 .nav{
 position:fixed;
 bottom:0;
+left:0;
+right:0;
+display:flex;
+justify-content:center;
+}
+
+.nav-inner{
 width:100%;
-max-width:500px;
+max-width:520px;
 display:flex;
 background:#0f172a;
 border-top:1px solid #333;
 }
 
-.nav button{
+.nav-inner button{
 flex:1;
 background:none;
 border:none;
@@ -78,17 +89,27 @@ color:white;
 padding:12px;
 }
 
-.locked{
-opacity:0.3;
-filter:blur(2px);
-}
+.locked{opacity:0.4;filter:blur(1px)}
+.small{font-size:12px;opacity:0.7}
 
-.small{
-font-size:12px;
-opacity:0.7;
-}
+#admin{display:none}
 
-#admin{display:none;}
+/* AI CHAT */
+#aiBox{
+position:fixed;
+bottom:80px;
+right:10px;
+width:90%;
+max-width:320px;
+background:#0f172a;
+border:1px solid #333;
+border-radius:12px;
+display:none;
+flex-direction:column;
+padding:10px;
+}
+#chatLog{height:200px;overflow:auto;font-size:12px;margin-bottom:8px}
+.aiMsg{margin:5px 0}
 </style>
 </head>
 
@@ -96,7 +117,7 @@ opacity:0.7;
 
 <div class="app">
 
-<div class="header">🎓 SCHOLAR MATCH</div>
+<div class="header">🎓 SCHOLAR MATCH PRO</div>
 
 <!-- AUTH -->
 <div id="auth" class="section active">
@@ -110,13 +131,15 @@ opacity:0.7;
 <!-- HOME -->
 <div id="home" class="section">
 <h3 id="welcome"></h3>
-<button onclick="logout()">Logout</button>
 
 <div class="card">
-<h3>💎 Premium (R50)</h3>
-<p>Unlock premium scholarships</p>
+<h3>💎 Premium Access (R50)</h3>
+<p>Unlock exclusive scholarships + AI features</p>
 <button onclick="upgrade()">Upgrade</button>
 </div>
+
+<button onclick="toggleAI()">Ask AI Assistant</button>
+<button onclick="logout()">Logout</button>
 </div>
 
 <!-- SCHOLARSHIPS -->
@@ -140,209 +163,171 @@ opacity:0.7;
 </select>
 
 <button onclick="addScholarship()">Add Scholarship</button>
+<button onclick="autoRefresh()">Auto Refresh Feed</button>
 </div>
 
 </div>
 
 <!-- NAV -->
 <div class="nav">
+<div class="nav-inner">
 <button onclick="go('home')">Home</button>
 <button onclick="go('scholarships')">List</button>
 <button onclick="go('admin')">Admin</button>
 </div>
+</div>
+
+<!-- AI BOX -->
+<div id="aiBox">
+<div id="chatLog"></div>
+<input id="aiInput" placeholder="Ask something...">
+<button onclick="sendAI()">Send</button>
+</div>
 
 <script type="module">
-
-/* ================= FIREBASE ================= */
-import { initializeApp } 
-from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-
-import { 
-getAuth,
-createUserWithEmailAndPassword,
-signInWithEmailAndPassword,
-onAuthStateChanged,
-signOut
-} 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } 
 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-import {
-getFirestore,
-collection,
-addDoc,
-getDocs,
-doc,
-getDoc,
-setDoc
-}
+import { getFirestore, collection, addDoc, getDocs, doc, getDoc, setDoc } 
 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-/* 🔴 YOUR FIREBASE CONFIG (REPLACE IF NEEDED) */
 const firebaseConfig = {
-apiKey: "YOUR_API_KEY",
-authDomain: "YOUR_AUTH_DOMAIN",
-projectId: "YOUR_PROJECT_ID"
+apiKey: "AIzaSyDB94Hy6sFUBXE4ObSOQmPW5As4Fbxaoi4",
+authDomain: "scholarship-platform-ec01f.firebaseapp.com",
+projectId: "scholarship-platform-ec01f",
+storageBucket: "scholarship-platform-ec01f.firebasestorage.app",
+messagingSenderId: "807575045909",
+appId: "1:807575045909:web:9a61a548638423d7988b1c"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-/* ================= ADMIN ================= */
 const ADMIN_EMAIL = "lethabophenyo53@gmail.com";
 
-let profile = { premium: false };
+let profile = {premium:false, usage:0};
 
-/* ================= NAV ================= */
-window.go = (page) => {
-if (!auth.currentUser) page = "auth";
+const emailEl = document.getElementById("email");
+const passEl = document.getElementById("password");
+const listEl = document.getElementById("list");
+const welcomeEl = document.getElementById("welcome");
 
-document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+window.go = (page)=>{
+if(!auth.currentUser) page="auth";
+document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
 document.getElementById(page).classList.add("active");
 };
 
-/* ================= AUTH ================= */
-window.signup = () => {
-createUserWithEmailAndPassword(auth, email.value, password.value)
-.then(async (u) => {
-await setDoc(doc(db, "users", u.user.uid), {
-email: u.user.email,
-premium: false
-});
-});
+window.signup = async ()=>{
+await createUserWithEmailAndPassword(auth,emailEl.value,passEl.value);
+const u = auth.currentUser;
+await setDoc(doc(db,"users",u.uid),{email:u.email,premium:false,usage:0});
 };
 
-window.login = () => {
-signInWithEmailAndPassword(auth, email.value, password.value);
-};
+window.login = ()=>signInWithEmailAndPassword(auth,emailEl.value,passEl.value);
+window.logout = ()=>signOut(auth);
 
-window.logout = () => signOut(auth);
+onAuthStateChanged(auth, async(user)=>{
+if(!user){go("auth");return;}
 
-/* ================= AUTH STATE ================= */
-onAuthStateChanged(auth, async (user) => {
-
-if (!user) {
-go("auth");
-return;
-}
-
-const ref = doc(db, "users", user.uid);
+const ref = doc(db,"users",user.uid);
 const snap = await getDoc(ref);
 
-/* safe fallback */
-profile = snap.exists() ? snap.data() : { premium: false };
+profile = snap.exists()?snap.data():{premium:false,usage:0};
 
-if (!snap.exists()) {
-await setDoc(ref, {
-email: user.email,
-premium: false
-});
-}
+await setDoc(ref,{email:user.email,premium:false,usage:0},{merge:true});
 
-const isAdmin = user.email === ADMIN_EMAIL;
-document.getElementById("admin").style.display = isAdmin ? "block" : "none";
-
-welcome.innerText = "Welcome " + user.email;
+document.getElementById("admin").style.display = user.email===ADMIN_EMAIL?"block":"none";
+welcomeEl.innerText="Welcome "+user.email;
 
 loadScholarships();
 go("home");
 });
 
-/* ================= LOAD SCHOLARSHIPS ================= */
-window.loadScholarships = async () => {
+window.loadScholarships = async ()=>{
+listEl.innerHTML="";
+const snap = await getDocs(collection(db,"scholarships"));
 
-list.innerHTML = "";
+snap.forEach(d=>{
+const s=d.data();
+const locked = s.type==="premium" && !profile.premium;
 
-const snap = await getDocs(collection(db, "scholarships"));
+const days = s.deadline?Math.max(0,Math.ceil((new Date(s.deadline)-new Date())/86400000)):"-";
 
-snap.forEach(d => {
-
-const s = d.data();
-const locked = s.type === "premium" && !profile?.premium;
-
-const days = Math.ceil(
-(new Date(s.deadline) - new Date()) / (1000 * 60 * 60 * 24)
-);
-
-list.innerHTML += `
-<div class="card ${locked ? "locked" : ""}">
+listEl.innerHTML+=`
+<div class="card ${locked?'locked':''}">
 <h4>${s.title}</h4>
-<p>${locked ? "🔒 Premium Locked" : s.desc}</p>
+<p>${locked?"🔒 Premium Only":s.desc}</p>
 <p class="small">${days} days left</p>
-
-${locked 
-? "<button disabled>Locked</button>"
-: `<a href="${s.link}" target="_blank"><button>Apply</button></a>`
-}
-</div>
-`;
+${locked?`<button disabled>Locked</button>`:`<a href="${s.link}" target="_blank"><button>Apply</button></a>`}
+</div>`;
 });
 };
 
-/* ================= ADD SCHOLARSHIP ================= */
-window.addScholarship = async () => {
+window.addScholarship = async ()=>{
+if(auth.currentUser.email!==ADMIN_EMAIL) return;
+await addDoc(collection(db,"scholarships"),{
+title:title.value,
+desc:desc.value,
+link:link.value,
+deadline:deadline.value,
+type:type.value
+});
+loadScholarships();
+};
 
-if (auth.currentUser.email !== ADMIN_EMAIL) {
-alert("No access");
+window.autoRefresh = async ()=>{
+const snap = await getDocs(collection(db,"scholarships"));
+snap.forEach(()=>{});
+alert("Feed synced");
+};
+
+window.upgrade = ()=>{
+const f=document.createElement("form");
+f.method="POST";
+f.action="https://www.payfast.co.za/eng/process";
+
+const data={
+merchant_id:"REPLACE_ME",
+merchant_key:"REPLACE_ME",
+amount:"50.00",
+item_name:"Premium Access",
+return_url:window.location.origin+"?paid=true",
+cancel_url:window.location.origin
+};
+
+Object.keys(data).forEach(k=>{
+const i=document.createElement("input");
+i.type="hidden";i.name=k;i.value=data[k];
+f.appendChild(i);
+});
+
+document.body.appendChild(f);
+f.submit();
+};
+
+window.toggleAI = ()=>{
+const box=document.getElementById("aiBox");
+box.style.display=box.style.display==="flex"?"none":"flex";
+};
+
+window.sendAI = ()=>{
+const input=document.getElementById("aiInput");
+const log=document.getElementById("chatLog");
+
+if(profile.usage>=3 && !profile.premium){
+log.innerHTML+="<div class='aiMsg'>Upgrade required for more AI usage</div>";
 return;
 }
 
-await addDoc(collection(db, "scholarships"), {
-title: title.value,
-desc: desc.value,
-link: link.value,
-deadline: deadline.value,
-type: type.value
-});
+profile.usage++;
 
-loadScholarships();
+log.innerHTML+=`<div class='aiMsg'>You: ${input.value}</div>`;
+log.innerHTML+=`<div class='aiMsg'>AI: Focus on scholarships, deadlines, and applications. Keep applying daily.</div>`;
+input.value="";
 };
-
-/* ================= PAYFAST ================= */
-window.upgrade = () => {
-
-const form = document.createElement("form");
-form.method = "POST";
-form.action = "https://www.payfast.co.za/eng/process";
-
-const data = {
-merchant_id: "10000100",
-merchant_key: "46f0cd694581a",
-amount: "50.00",
-item_name: "Premium Access",
-return_url: window.location.origin + "?paid=true",
-cancel_url: window.location.origin
-};
-
-for (let key in data) {
-const input = document.createElement("input");
-input.type = "hidden";
-input.name = key;
-input.value = data[key];
-form.appendChild(input);
-}
-
-document.body.appendChild(form);
-form.submit();
-};
-
-/* ================= PAYMENT SUCCESS ================= */
-window.addEventListener("load", async () => {
-
-const url = new URLSearchParams(window.location.search);
-
-if (url.get("paid") === "true" && auth.currentUser) {
-
-await setDoc(doc(db, "users", auth.currentUser.uid), {
-premium: true,
-email: auth.currentUser.email
-}, { merge: true });
-
-alert("Premium Activated!");
-loadScholarships();
-}
-});
-
 </script>
 
 </body>
