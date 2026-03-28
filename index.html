@@ -295,13 +295,33 @@ if(!user){go("auth");return;}
 
 const ref = doc(db,"users",user.uid);
 const snap = await getDoc(ref);
+const urlParams = new URLSearchParams(window.location.search);
+
+if (urlParams.get("paid") === "true") {
+  await setDoc(ref, { premium: true }, { merge: true });
+  alert("🎉 Premium Activated!");
+  profile.premium = true;
+}
 
 profile = snap.exists()?snap.data():{premium:false,usage:0};
 
-await setDoc(ref,{email:user.email,premium:false,usage:0},{merge:true});
+const snap = await getDoc(ref);
 
-document.getElementById("admin").style.display = user.email===ADMIN_EMAIL?"block":"none";
-welcomeEl.innerText="Welcome "+user.email;
+profile = snap.exists()
+  ? snap.data()
+  : { premium: false, usage: 0 };
+
+// create user ONLY if not exists
+if (!snap.exists()) {
+  await setDoc(ref, {
+    email: user.email,
+    premium: false,
+    usage: 0
+  });
+}
+  
+document.getElementById("admin").style.display =
+user.uid === "lethabophenyo53@gmail.com" ? "block" : "none";
 
 loadScholarships();
 go("home");
@@ -369,6 +389,19 @@ window.autoRefresh = async ()=>{
 const snap = await getDocs(collection(db,"scholarships"));
 snap.forEach(()=>{});
 alert("Feed synced");
+};
+
+  window.cleanOldScholarships = async () => {
+const snap = await getDocs(collection(db,"scholarships"));
+const now = Date.now();
+
+snap.forEach(async (docItem) => {
+const data = docItem.data();
+
+if (data.createdAt && now - data.createdAt > 7 * 24 * 60 * 60 * 1000) {
+await deleteDoc(doc(db,"scholarships",docItem.id));
+}
+});
 };
 
 window.upgrade = ()=>{
